@@ -28,7 +28,6 @@ class EmployeeProfile(models.Model):
     position = models.CharField(max_length=100)
 
 
-
 # Asset model
 class Asset(models.Model):
     STATUS_CHOICES = [
@@ -50,7 +49,7 @@ class Asset(models.Model):
         return f"{self.name} ({self.serial_number})"
 
 
-# Asset History model (optional but good for tracking)
+# Asset History model
 class AssetHistory(models.Model):
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     previous_user = models.ForeignKey(

@@ -1,4 +1,4 @@
-from .views import assets_list_create, asset_detail, asset_history_list
+from assets.views import assets_list_create, asset_detail, asset_history_list
 from django.urls import path
 
 

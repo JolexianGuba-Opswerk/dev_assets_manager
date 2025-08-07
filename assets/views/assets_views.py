@@ -1,10 +1,9 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Asset, Category, AssetHistory
-import json
+from assets.models import Asset, Category, AssetHistory
 from django.contrib.auth.models import User
-
+import json
 
 # Get all assets or create a new asset
 @csrf_exempt
@@ -77,8 +76,12 @@ def assets_list_create(request):
 def asset_detail(request, asset_id):
     try:
         asset = Asset.objects.get(id=asset_id)
-        history_entries = asset.assethistory_set.all().order_by('-change_date')
 
+    except Asset.DoesNotExist:
+        return JsonResponse({"error": "Asset not found"}, status=404)
+
+    if request.method == 'GET':
+        history_entries = asset.assethistory_set.all().order_by('-change_date')
         history_data = [
             {
                 "change_date": entry.change_date.strftime('%Y-%m-%d %H:%M:%S'),
@@ -88,10 +91,7 @@ def asset_detail(request, asset_id):
             }
             for entry in history_entries
         ]
-    except Asset.DoesNotExist:
-        return JsonResponse({"error": "Asset not found"}, status=404)
 
-    if request.method == 'GET':
         return JsonResponse({
             "id": asset.id,
             "name": asset.name,
@@ -117,6 +117,7 @@ def asset_detail(request, asset_id):
             if not body:
                 return JsonResponse({"error": "No data provided"}, status=400)
 
+            # Update asset fields based on the provided body
             asset.name = body.get('name', asset.name)
             asset.serial_number = body.get('serial_number', asset.serial_number)
             asset.status = body.get('status', asset.status)
@@ -167,34 +168,3 @@ def asset_detail(request, asset_id):
         asset.delete()
         return JsonResponse({"message": "Asset deleted"})
 
-
-# Asset History Section
-@csrf_exempt
-@require_http_methods(["GET"])
-def asset_history_list(request):
-    sort_order = request.GET.get('sort', 'desc')
-
-    if sort_order not in ['asc', 'desc']:
-        return JsonResponse({"error": "Invalid sort value. Use 'asc' or 'desc'."}, status=400)
-
-    if sort_order == 'asc':
-        history_entries = AssetHistory.objects.select_related('asset', 'previous_user', 'new_user').order_by('change_date')
-    else:
-        history_entries = AssetHistory.objects.select_related('asset', 'previous_user', 'new_user').order_by('-change_date')
-
-    data = []
-    for entry in history_entries:
-        data.append({
-            "id": entry.id,
-            "asset": {
-                "id": entry.asset.id,
-                "name": entry.asset.name,
-                "serial_number": entry.asset.serial_number,
-            },
-            "previous_user": entry.previous_user.get_full_name() if entry.previous_user else "Unassigned",
-            "new_user": entry.new_user.get_full_name() if entry.new_user else "Unassigned",
-            "change_date": entry.change_date.strftime("%Y-%m-%d %H:%M:%S"),
-            "notes": entry.notes,
-        })
-
-    return JsonResponse(data, safe=False)

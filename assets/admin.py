@@ -6,4 +6,3 @@ admin.site.register(AssetHistory)
 admin.site.register(Department)
 admin.site.register(Category)
 admin.site.register(EmployeeProfile)
-# Register your models here.

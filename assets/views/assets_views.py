@@ -1,9 +1,13 @@
+from pprint import pprint
+
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import Asset, Category, AssetHistory
-import json
+from assets.models import Asset, Category, AssetHistory
 from django.contrib.auth.models import User
+from django.db import connection, IntegrityError
+import json
 
 
 # Get all assets or create a new asset
@@ -11,21 +15,26 @@ from django.contrib.auth.models import User
 @require_http_methods(["GET", "POST"])
 def assets_list_create(request):
     if request.method == 'GET':
-        assets = Asset.objects.all().order_by('-id')
-        if not assets:
+        assets = (Asset.objects.only('id','name', 'serial_number', 'status', 'purchase_date')
+                  .all().order_by('-id'))
+
+        if not assets.exists():
             return JsonResponse({"message": "No assets found"}, status=404)
 
-        data = [
-            {
-                "id": a.id,
-                "name": a.name,
-                "serial_number": a.serial_number,
-                "status": a.get_status_display(),
-                "purchase_date": a.purchase_date,
-            }
-            for a in assets
-        ]
-        return JsonResponse(data, safe=False)
+        serialize_data = []
+        for asset in assets:
+            serialize_data.append({
+                "id": asset.id,
+                "name": asset.name,
+                "serial_number": asset.serial_number,
+                "status": asset.get_status_display(),
+                "purchase_date": asset.purchase_date.strftime('%Y-%m-%d') if asset.purchase_date else None,
+            })
+
+        pprint(connection.queries)
+        print('Connection Queries:', len(connection.queries))
+
+        return JsonResponse(serialize_data, safe=False)
 
     elif request.method == 'POST':
         employee = None
@@ -75,24 +84,26 @@ def assets_list_create(request):
 @csrf_exempt
 @require_http_methods(["GET", "PATCH", "DELETE"])
 def asset_detail(request, asset_id):
-    try:
-        asset = Asset.objects.get(id=asset_id)
-        history_entries = asset.assethistory_set.all().order_by('-change_date')
-
-        history_data = [
-            {
-                "change_date": entry.change_date.strftime('%Y-%m-%d %H:%M:%S'),
-                "previous_user": entry.previous_user.get_full_name() if entry.previous_user else "None",
-                "new_user": entry.new_user.get_full_name() if entry.new_user else "None",
-                "notes": entry.notes,
-            }
-            for entry in history_entries
-        ]
-    except Asset.DoesNotExist:
-        return JsonResponse({"error": "Asset not found"}, status=404)
 
     if request.method == 'GET':
-        return JsonResponse({
+        try:
+            asset = Asset.objects.select_related('assigned_to', 'category').get(id=asset_id)
+        except Asset.DoesNotExist:
+            return JsonResponse({"error": "Asset not found"}, status=404)
+
+        history_entries = asset.assethistory_set.select_related('new_user', 'previous_user').all().order_by(
+            '-change_date')
+        history_data = []
+
+        for history in history_entries:
+            history_data.append({
+                "change_date": history.change_date.strftime('%Y-%m-%d %H:%M:%S'),
+                "previous_user": history.previous_user.get_full_name() if history.previous_user else "None",
+                "new_user": history.new_user.get_full_name() if history.new_user else "None",
+                "notes": history.notes,
+            })
+
+        serialize_data = {
             "id": asset.id,
             "name": asset.name,
             "serial_number": asset.serial_number,
@@ -109,14 +120,25 @@ def asset_detail(request, asset_id):
                 )
             } if asset.assigned_to else "No user assigned",
             "asset_history": history_data if history_data else "No asset history"
-        })
+        }
+
+        pprint(connection.queries)
+        print('Connection Queries:', len(connection.queries))
+
+        return JsonResponse(serialize_data, status=200)
 
     elif request.method == 'PATCH':
+        try:
+            asset = Asset.objects.get(id=asset_id)
+        except Asset.DoesNotExist:
+            return JsonResponse({"error": "Asset not found"}, status=404)
+
         try:
             body = json.loads(request.body)
             if not body:
                 return JsonResponse({"error": "No data provided"}, status=400)
 
+            # Update asset fields based on the provided body
             asset.name = body.get('name', asset.name)
             asset.serial_number = body.get('serial_number', asset.serial_number)
             asset.status = body.get('status', asset.status)
@@ -158,43 +180,56 @@ def asset_detail(request, asset_id):
             asset.full_clean()
             asset.save()
 
-            return JsonResponse({"message": "Asset updated"})
+            return JsonResponse({"message": "Asset updated"},status=200)
 
+        except ValidationError as ve:
+            return JsonResponse({"error": str(ve.message_dict)}, status=400)
+        except IntegrityError as ie:
+            return JsonResponse({"error": str(ie)}, status=400)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
     elif request.method == 'DELETE':
+        try:
+            asset = Asset.objects.get(id=asset_id)
+        except Asset.DoesNotExist:
+            return JsonResponse({"error": "Asset not found"}, status=404)
+
         asset.delete()
-        return JsonResponse({"message": "Asset deleted"})
+        return JsonResponse({"message": "Asset deleted"}, status=204)
 
 
-# Asset History Section
 @csrf_exempt
 @require_http_methods(["GET"])
-def asset_history_list(request):
-    sort_order = request.GET.get('sort', 'desc')
+def get_users_assets(request):
+    if not request.method == 'GET':
+        return JsonResponse({"error": "Method not allowed"}, status=405)
 
-    if sort_order not in ['asc', 'desc']:
-        return JsonResponse({"error": "Invalid sort value. Use 'asc' or 'desc'."}, status=400)
+    connection.queries.clear()
+    # users = User.objects.all()
 
-    if sort_order == 'asc':
-        history_entries = AssetHistory.objects.select_related('asset', 'previous_user', 'new_user').order_by('change_date')
-    else:
-        history_entries = AssetHistory.objects.select_related('asset', 'previous_user', 'new_user').order_by('-change_date')
+    users = User.objects.select_related('employeeprofile__department').prefetch_related('asset_set')
 
+    if not users.exists():
+        return JsonResponse({"message": "No users found"}, status=404)
     data = []
-    for entry in history_entries:
-        data.append({
-            "id": entry.id,
-            "asset": {
-                "id": entry.asset.id,
-                "name": entry.asset.name,
-                "serial_number": entry.asset.serial_number,
-            },
-            "previous_user": entry.previous_user.get_full_name() if entry.previous_user else "Unassigned",
-            "new_user": entry.new_user.get_full_name() if entry.new_user else "Unassigned",
-            "change_date": entry.change_date.strftime("%Y-%m-%d %H:%M:%S"),
-            "notes": entry.notes,
-        })
 
-    return JsonResponse(data, safe=False)
+    for user in users:
+        for asset in user.asset_set.all():
+            data.append({
+                "user_id": user.id,
+                "user_full_name": user.get_full_name(),
+                "user_department": (
+                    user.employeeprofile.department.full_name if hasattr(user, 'employeeprofile') else "No department"
+                ),
+                "asset_id": asset.id,
+                "asset_name": asset.name,
+                "asset_serial_number": asset.serial_number,
+                "asset_status": asset.get_status_display(),
+                "asset_purchase_date": asset.purchase_date.strftime('%Y-%m-%d'),
+            })
+
+    pprint(connection.queries)
+    print(len(connection.queries), " queries executed")
+
+    return JsonResponse(data, safe=False, status=200)

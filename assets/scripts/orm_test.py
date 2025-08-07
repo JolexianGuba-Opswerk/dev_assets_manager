@@ -1,23 +1,15 @@
-from assets.models import Department, Category, Employee, Asset, AssetHistory
+from assets.models import Asset, Department, AssetHistory
 from pprint import pprint
 from django.db import connection
+from django.contrib.auth.models import User
+
 
 def run():
-    # Create 
-    department = Department()
-    department.name = "FINANCE"
-    department.save()
-    print("Department created:", department.name)
+    users = User.objects.prefetch_related('asset_set')
+    #users = User.objects.all()
 
-    # Get all departments
-    for dept in Department.objects.all():
-        print("-", dept.name)
+    for user in users:
+        for asset in user.asset_set.all():
+            print(f"{user.get_full_name()} - {asset.name} ({asset.serial_number})")
 
-    # Updating a department 
-    department2 = Department.objects.first()
-    department2.name = "HR"
-    department2.save()
-    print("Updated department to:", department2.name)
-
-
-    pprint(connection.queries)  
+    print("Query",len(connection.queries))

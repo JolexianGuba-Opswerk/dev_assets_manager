@@ -220,11 +220,18 @@ def get_users_assets(request):
                 "user_department": (
                     user.employeeprofile.department.full_name if hasattr(user, 'employeeprofile') else "No department"
                 ),
-                "asset_id": asset.id,
-                "asset_name": asset.name,
-                "asset_serial_number": asset.serial_number,
-                "asset_status": asset.get_status_display(),
-                "asset_purchase_date": asset.purchase_date.strftime('%Y-%m-%d'),
+                "assets":[
+
+                    {
+                        "asset_id": asset.id,
+                        "asset_name": asset.name,
+                        "asset_serial_number": asset.serial_number,
+                        "asset_status": asset.get_status_display(),
+                        "asset_purchase_date": asset.purchase_date.strftime('%Y-%m-%d'),
+                    }
+                    for asset in user.asset_set.all()
+                ],
+
             })
 
     pprint(connection.queries)

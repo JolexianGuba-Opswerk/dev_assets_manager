@@ -87,3 +87,84 @@ def employee_list(request):
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
+
+    elif request.method == 'PATCH':
+        try:
+            body = json.loads(request.body)
+            employee_id = body.get('id')
+            if not employee_id:
+                return JsonResponse({"error": "Employee ID is required"}, status=400)
+
+            try:
+                employee = User.objects.get(id=employee_id)
+            except User.DoesNotExist:
+                return JsonResponse({"error": "Employee does not exist"}, status=404)
+
+            if 'department' in body:
+                try:
+                    department = Department.objects.get(id=body['department'])
+                    employee.employeeprofile.department = department
+                except Department.DoesNotExist:
+                    return JsonResponse({"error": "Department does not exist"}, status=404)
+
+            if 'position' in body:
+                employee.employeeprofile.position = body['position']
+
+            employee.full_clean()
+            employee.save()
+
+            return JsonResponse({"message": "Employee updated successfully"}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        except ValidationError as e:
+            return JsonResponse({"error": str(e.message_dict)}, status=400)
+
+
+@csrf_exempt
+@require_http_methods(["PATCH", "DELETE"])
+def employee_details(request, employee_id):
+    if request.method == 'PATCH':
+        try:
+            employee = User.objects.select_related('employeeprofile','employeeprofile__department').get(id=employee_id)
+            body = json.loads(request.body)
+            if not body:
+                return JsonResponse({"error": "No data provided"}, status=400)
+
+            if 'department' in body and body['department'] is not None:
+                try:
+                    department = Department.objects.get(id=body['department'])
+                    employee.employeeprofile.department = department
+                except Department.DoesNotExist:
+                    return JsonResponse({"error": "Department does not exist"}, status=404)
+
+            updatable_fields = ['first_name', 'last_name', 'email', 'username', 'position']
+
+            # Update the fields that are needed
+            for field in updatable_fields:
+                if field in body and body[field] not in [None, ""]:
+                    setattr(employee, field, body[field])
+
+            employee.full_clean()
+            employee.save()
+            pprint(connection.queries)
+            return JsonResponse({"message": "Employee updated successfully"}, status=200)
+
+        except User.DoesNotExist:
+            return JsonResponse({"error": "Employee not found"}, status=404)
+        except ValidationError as ve:
+            return JsonResponse({"error": str(ve.message_dict)}, status=400)
+        except IntegrityError as ie:
+            return JsonResponse({"error": str(ie)}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    elif request.method == 'DELETE':
+        try:
+            employee = User.objects.get(id=employee_id)
+            employee.delete()
+            return JsonResponse({"message": "Employee deleted successfully"}, status=204)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "Employee not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)

@@ -20,7 +20,7 @@ def assets_list_create(request):
 
         if not assets.exists():
             return JsonResponse({"message": "No assets found"}, status=404)
-
+        
         serialize_data = []
         for asset in assets:
             serialize_data.append({
@@ -138,13 +138,12 @@ def asset_detail(request, asset_id):
             if not body:
                 return JsonResponse({"error": "No data provided"}, status=400)
 
+            updatetable_fields = ['name', 'serial_number', 'status', 'purchase_date', 'description']
+
             # Update asset fields based on the provided body
-            asset.name = body.get('name', asset.name)
-            asset.serial_number = body.get('serial_number', asset.serial_number)
-            asset.status = body.get('status', asset.status)
-            asset.purchase_date = body.get('purchase_date', asset.purchase_date)
-            asset.description = body.get('description', asset.description)
-            asset.status = body.get('status', asset.status)
+            for field in updatetable_fields:
+                if field in body and body[field] not in [None, '']:
+                    setattr(asset, field, body[field])
 
             if 'category' in body:
                 try:
@@ -173,13 +172,12 @@ def asset_detail(request, asset_id):
                             new_user=user,
                             notes=body.get('notes', " ")
                         )
-
                 except User.DoesNotExist:
                     return JsonResponse({"error": "Assigned user does not exist"}, status=404)
 
+
             asset.full_clean()
             asset.save()
-
             return JsonResponse({"message": "Asset updated"},status=200)
 
         except ValidationError as ve:

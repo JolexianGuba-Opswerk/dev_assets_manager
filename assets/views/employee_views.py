@@ -14,7 +14,12 @@ import json
 @require_http_methods(["GET", "POST"])
 def employee_list(request):
     if request.method == 'GET':
-        employees = User.objects.select_related('employeeprofile', 'employeeprofile__department').order_by('-id')
+        department_name = request.GET.get('department')
+        if department_name:
+            employees = User.objects.select_related('employeeprofile', 'employeeprofile__department').filter(
+                employeeprofile__department__name__exact=department_name.upper()).order_by('-id')
+        else:
+            employees = User.objects.select_related('employeeprofile', 'employeeprofile__department').order_by('-id')
 
         if not employees.exists():
             return JsonResponse({"message": "No employees found"}, status=404)
@@ -31,7 +36,9 @@ def employee_list(request):
                                                                                   'employeeprofile') else None,
                 "position": employee.employeeprofile.position if hasattr(employee, 'employeeprofile') else None,
             })
+            
 
+        print("SQL Queries:",len(connection.queries))
         pprint(connection.queries)
         return JsonResponse(serialized_data, safe=False, status=200)
 

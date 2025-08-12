@@ -23,7 +23,7 @@ class Category(models.Model):
 
 # Employee model
 class EmployeeProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     position = models.CharField(max_length=100)
 
@@ -40,7 +40,7 @@ class Asset(models.Model):
     name = models.CharField(max_length=100)
     serial_number = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, default=None, null=True, blank=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, default=None, null=True, blank=True, related_name='assets')
     purchase_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='IN_STORAGE')
     description = models.TextField(blank=True)

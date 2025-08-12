@@ -1,13 +1,13 @@
-from assets.views import (assets_list_create, asset_detail, asset_history_list,
-                          get_users_assets, employee_list, employee_details)
+from assets.views import (AssetListCreateAPIView, AssetDetailsView, UserAssetDetailsView, EmployeeListCreateAPIView)
 from django.urls import path
 
 
 urlpatterns = [
-    path('assets/', assets_list_create, name='assets_list_create'),
-    path('assets/user/', get_users_assets, name='get_users_assets'),
-    path('assets/<int:asset_id>/', asset_detail, name='asset_detail'),
-    path('assets-history/', asset_history_list, name='asset_history_list'),
-    path('employees/<int:employee_id>/', employee_details, name='employee_details'),
-    path('employees/', employee_list, name='employee_list'),
+    path('assets/', AssetListCreateAPIView.as_view(), name='asset_list_create'),
+    path('assets/<int:id>/', AssetDetailsView.as_view(), name='asset_list_detail'),
+    path('assets/employee/', UserAssetDetailsView.as_view(), name='employee_assets'),
+
+    # path('assets-history/', asset_history_list, name='asset_history_list'),
+    path('employees/', EmployeeListCreateAPIView.as_view(), name='employee_details'),
+    # path('employees/', employee_list, name='employee_list'),
 ]

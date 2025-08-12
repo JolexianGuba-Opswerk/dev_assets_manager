@@ -5,3 +5,5 @@ psycopg2-binary==2.9.10
 sqlparse==0.5.3
 dotenv~=0.9.9
 python-dotenv~=1.1.1
+djangorestframework~=3.16.1
+Faker~=37.5.3

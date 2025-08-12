@@ -1,20 +1,35 @@
 from pprint import pprint
-
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from assets.models import Asset, Category, AssetHistory, Department, EmployeeProfile
+from assets.models import Department, EmployeeProfile
 from django.contrib.auth.models import User
 from django.db import connection, IntegrityError
+from rest_framework.decorators import api_view
+from assets.serializers.employee_serializers import EmployeeListSerializer, EmployeeCreateSerializer
+from rest_framework import generics
 import json
 
 
-@csrf_exempt
-@require_http_methods(["GET", "POST"])
+class EmployeeListCreateAPIView(generics.ListCreateAPIView):
+    # queryset = User.objects.select_related('employeeprofile', 'employeeprofile__department').filter(
+    #             employeeprofile__department__name__exact=department_name.upper()).order_by('-id')
+
+    queryset = User.objects.select_related('employee_profile','employee_profile__department').order_by('-id')
+    serializer_class = EmployeeListSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return EmployeeCreateSerializer
+        return super().get_serializer_class()
+
+
+
+api_view(['GET', 'POST', 'PATCH'])
 def employee_list(request):
     if request.method == 'GET':
-        department_name = request.GET.get('department')
+        department_name = request.query_params.get('department')
         if department_name:
             employees = User.objects.select_related('employeeprofile', 'employeeprofile__department').filter(
                 employeeprofile__department__name__exact=department_name.upper()).order_by('-id')
@@ -41,59 +56,6 @@ def employee_list(request):
         print("SQL Queries:",len(connection.queries))
         pprint(connection.queries)
         return JsonResponse(serialized_data, safe=False, status=200)
-
-    elif request.method == 'POST':
-        try:
-            body = json.loads(request.body)
-
-            if not body:
-                return JsonResponse({"error": "No data provided"}, status=400)
-
-            department_id = body.get('department')
-            position = body.get('position')
-
-            if department_id and position:
-                try:
-                    department = Department.objects.get(id=department_id)
-                except Department.DoesNotExist:
-                    return JsonResponse({"error": "Department does not exist"}, status=404)
-            else:
-                return JsonResponse({"error": "Department ID and position is required "}, status=400)
-
-            try:
-                user = User.objects.create_user(
-                    username=body.get('username'),
-                    password=body.get('password'),
-                    first_name=body.get('first_name'),
-                    last_name=body.get('last_name'),
-                    email=body.get('email')
-                )
-                user.full_clean()
-
-                if not user:
-                    return JsonResponse({"error": "User creation failed"}, status=400)
-
-                employeeprofile = EmployeeProfile.objects.create(
-                    user=user,
-                    department=department,
-                    position=position
-                )
-                employeeprofile.full_clean()
-
-            except ValidationError as e:
-                return JsonResponse({"error": str(e.message_dict)}, status=400)
-            except IntegrityError as e:
-                return JsonResponse({"error": str(e)}, status=400)
-            except Exception as e:
-                return JsonResponse({"error": str(e)}, status=400)
-
-            return JsonResponse({
-                "message": "Employee created successfully",
-                "employee_id": user.id
-            }, status=201)
-
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
     elif request.method == 'PATCH':
         try:
@@ -126,6 +88,60 @@ def employee_list(request):
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
         except ValidationError as e:
             return JsonResponse({"error": str(e.message_dict)}, status=400)
+
+
+def create_employee_profile(request):
+    try:
+        body = json.loads(request.body)
+
+        if not body:
+            return JsonResponse({"error": "No data provided"}, status=400)
+
+        department_id = body.get('department')
+        position = body.get('position')
+
+        if department_id and position:
+            try:
+                department = Department.objects.get(id=department_id)
+            except Department.DoesNotExist:
+                return JsonResponse({"error": "Department does not exist"}, status=404)
+        else:
+            return JsonResponse({"error": "Department ID and position is required "}, status=400)
+
+        try:
+            user = User.objects.create_user(
+                username=body.get('username'),
+                password=body.get('password'),
+                first_name=body.get('first_name'),
+                last_name=body.get('last_name'),
+                email=body.get('email')
+            )
+            user.full_clean()
+
+            if not user:
+                return JsonResponse({"error": "User creation failed"}, status=400)
+
+            employeeprofile = EmployeeProfile.objects.create(
+                user=user,
+                department=department,
+                position=position
+            )
+            employeeprofile.full_clean()
+
+        except ValidationError as e:
+            return JsonResponse({"error": str(e.message_dict)}, status=400)
+        except IntegrityError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+        return JsonResponse({
+            "message": "Employee created successfully",
+            "employee_id": user.id
+        }, status=201)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
 
 @csrf_exempt

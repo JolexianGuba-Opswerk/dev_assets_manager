@@ -6,27 +6,56 @@ from django.views.decorators.http import require_http_methods
 from assets.models import Department, EmployeeProfile
 from django.contrib.auth.models import User
 from django.db import connection, IntegrityError
-from rest_framework.decorators import api_view
-from assets.serializers.employee_serializers import EmployeeListSerializer, EmployeeCreateSerializer
+
+from assets.permissions import IsOwnerOrReadOnly
+from assets.serializers.employee_serializers import EmployeeListSerializer, EmployeeCreateSerializer, \
+    EmployeeSideUpdateSerializer
 from rest_framework import generics
-import json
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
 class EmployeeListCreateAPIView(generics.ListCreateAPIView):
-    # queryset = User.objects.select_related('employeeprofile', 'employeeprofile__department').filter(
-    #             employeeprofile__department__name__exact=department_name.upper()).order_by('-id')
+    # Add django-filtering in here...
 
     queryset = User.objects.select_related('employee_profile','employee_profile__department').order_by('-id')
     serializer_class = EmployeeListSerializer
+    permission_classes = [IsAdminUser, IsAuthenticated]
+
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return EmployeeCreateSerializer
         return super().get_serializer_class()
 
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
 
 
-api_view(['GET', 'POST', 'PATCH'])
+class EmployeeDetailsView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.select_related('employee_profile', 'employee_profile__department').order_by('-id')
+    serializer_class = EmployeeCreateSerializer
+    permission_classes = [IsAdminUser, IsAuthenticated]
+    lookup_field = 'id'
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return EmployeeListSerializer
+        return super().get_serializer_class()
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
+
+class EmployeeSideDetailsUpdate(generics.UpdateAPIView):
+    queryset = User.objects.select_related('employee_profile', 'employee_profile__department')
+    permission_classes = [IsOwnerOrReadOnly]
+    serializer_class = EmployeeSideUpdateSerializer
+    lookup_field = 'id'
+
+
 def employee_list(request):
     if request.method == 'GET':
         department_name = request.query_params.get('department')

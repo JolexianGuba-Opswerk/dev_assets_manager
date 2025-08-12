@@ -45,7 +45,14 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
             department=Department.objects.get(name=department),
             position=position
         )
-
         return user
+
+
+class EmployeeSideUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name',
+                  'email', 'password']
+        write_only_fields = 'password'
 
 

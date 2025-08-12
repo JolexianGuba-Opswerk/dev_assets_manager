@@ -1,3 +1,3 @@
 from assets.views.assets_views import AssetListCreateAPIView, AssetDetailsView, UserAssetDetailsView
 from assets.views.assets_history_views import asset_history_list
-from assets.views.employee_views import employee_list, EmployeeListCreateAPIView
+from assets.views.employee_views import employee_list, EmployeeListCreateAPIView, EmployeeDetailsView, EmployeeSideDetailsUpdate

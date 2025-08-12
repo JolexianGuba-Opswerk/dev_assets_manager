@@ -1,18 +1,30 @@
+from django_filters.rest_framework import DjangoFilterBackend
+
 from assets.models import Asset
 from django.contrib.auth.models import User
 from rest_framework import generics
-from assets.serializers.asset_serializers import AssetListSerializer, AssetCreateSerializer, AssetDetailSerializer, UserAssetListSerializer
+from assets.serializers.asset_serializers import (AssetListSerializer, AssetCreateSerializer,
+                                                  AssetDetailSerializer, UserAssetListSerializer)
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
 # CREATE/GET view for Asset
 class AssetListCreateAPIView(generics.ListCreateAPIView):
     queryset = Asset.objects.select_related('category', 'assigned_to').order_by('-id')
     serializer_class = AssetListSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['name', 'status']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return AssetCreateSerializer
         return super().get_serializer_class()
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
 
 
 # GET/UPDATE/DELETE view for Asset Details
@@ -25,6 +37,11 @@ class AssetDetailsView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.method == 'GET':
             return AssetDetailSerializer
         return super().get_serializer_class()
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
 
 
 # Getting User's Asset with Details

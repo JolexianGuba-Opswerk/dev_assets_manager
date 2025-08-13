@@ -26,7 +26,6 @@ class AssetListCreateAPIView(generics.ListCreateAPIView):
     ordering_fields = ['purchased_date', 'name']
     search_fields = ['name','serial_number','description']
 
-
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return AssetCreateSerializer
@@ -86,6 +85,7 @@ class UserOwnAssetDetailsAPIView(generics.RetrieveAPIView):
 
 # Create ForgetPasswordView
 class UserForgetPasswordAPIView(generics.CreateAPIView):
+    # Added Sending OTP via email here..
     pass
 
 

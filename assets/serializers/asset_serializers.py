@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from assets.models import Asset, Department, Category, EmployeeProfile
+from assets.models import Asset, Department, Category, EmployeeProfile, AssetHistory
 from django.contrib.auth.models import User
 
 
@@ -48,13 +48,33 @@ class AssetCreateSerializer(serializers.ModelSerializer):
         asset = Asset.objects.create(**validated_data)
 
         if assigned_to:
-            Asset.objects.create(
+            AssetHistory.objects.create(
                 asset=asset,
                 previous_user=None,
                 new_user=assigned_to,
                 notes=notes
             )
         return asset
+
+    def update(self, instance, validated_data):
+        notes = validated_data.pop('notes', "")
+        new_user = validated_data.get('assigned_to', None)
+        old_user = instance.assigned_to
+
+
+        print(validated_data.get('status'))
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        if 'assigned_to' in validated_data:
+            AssetHistory.objects.create(
+                asset=instance,
+                previous_user=old_user,
+                new_user=new_user,
+                notes=notes
+            )
+        return instance
 
 
 class AssetListSerializer(serializers.ModelSerializer):
@@ -114,3 +134,17 @@ class UserAssetListSerializer(serializers.ModelSerializer):
             }
         return None
 
+
+class AssetHistorySerializer(serializers.ModelSerializer):
+    new_user = serializers.StringRelatedField()
+    previous_user = serializers.StringRelatedField()
+    class Meta:
+        model = AssetHistory
+        fields = ['previous_user', 'new_user', 'change_date', 'notes']
+
+
+class AssetHistoryListSerializer(serializers.ModelSerializer):
+    history = AssetHistorySerializer(many=True, source='assets')
+    class Meta:
+        model = Asset
+        fields = ['id','name', 'serial_number', 'history']

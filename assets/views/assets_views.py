@@ -1,11 +1,14 @@
+from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
 
 from assets.filters import AssetFilter
 from assets.models import Asset
 from django.contrib.auth.models import User
 from rest_framework import generics, filters
+
+from assets.permissions import IsOwnerOrReadOnly, IsOwnerAssetsOrReadOnly
 from assets.serializers.asset_serializers import (AssetListSerializer, AssetCreateSerializer,
-                                                  AssetDetailSerializer, UserAssetListSerializer)
+                                                  AssetDetailSerializer, UserAssetListSerializer, UserAssetSerializer)
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
@@ -54,9 +57,42 @@ class AssetDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
 # Getting User's Asset with Details
 class UserAssetDetailsView(generics.ListAPIView):
-    queryset = User.objects.select_related('employee_profile__department').prefetch_related('assets__category')
+    queryset = (User.objects
+                .select_related('employee_profile__department')
+                .prefetch_related('assets__category'))
     serializer_class = UserAssetListSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    filter_backends = [
+        filters.SearchFilter
+    ]
+    search_fields = ['username','email']
+
+
+# Getting Own Assets of User
+class UserOwnAssetDetailsAPIView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated, IsOwnerAssetsOrReadOnly]
+    queryset = User.objects.prefetch_related(
+        Prefetch(
+            'assets',
+            Asset.objects
+            .select_related('category')
+            .order_by('-purchase_date')
+        )
+    )
+    serializer_class = UserAssetSerializer
+    lookup_field = 'id'
+
+
+# Create ForgetPasswordView
+class UserForgetPasswordAPIView(generics.CreateAPIView):
+    pass
+
+
+
+
+
+
 
 
 

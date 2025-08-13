@@ -1,6 +1,6 @@
 from assets.views import (AssetListCreateAPIView, AssetDetailsView,
                           UserAssetDetailsView, EmployeeListCreateAPIView, EmployeeDetailsView,
-                          EmployeeSideDetailsUpdate, AssetHistoryListAPIView)
+                          EmployeeSideDetailsUpdate, AssetHistoryListAPIView, UserOwnAssetDetailsAPIView)
 from django.urls import path
 
 
@@ -14,7 +14,7 @@ urlpatterns = [
     path('employees/', EmployeeListCreateAPIView.as_view(), name='employee_details'),
     path('employees/<int:id>/', EmployeeDetailsView.as_view(), name='employee_details'),
     path('employees-side/<int:id>/', EmployeeSideDetailsUpdate.as_view(), name='employee_details'),
-
+    path('employees-side/asset/<int:id>/', UserOwnAssetDetailsAPIView.as_view(), name='employee_assets_details'),
     path('assets/history/', AssetHistoryListAPIView.as_view(), name='asset_history_list'),
 
 ]

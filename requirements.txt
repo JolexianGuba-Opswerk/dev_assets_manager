@@ -7,3 +7,6 @@ dotenv~=0.9.9
 python-dotenv~=1.1.1
 djangorestframework~=3.16.1
 Faker~=37.5.3
+django-filter~=25.1
+django-debug-toolbar~=6.0.0
+celery~=5.5.3

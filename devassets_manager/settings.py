@@ -125,6 +125,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
 }
 
 
@@ -168,3 +170,5 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # Or any directory you want
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+CELERY_BROKER_URL = ""

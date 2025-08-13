@@ -1,7 +1,25 @@
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from assets.models import AssetHistory
+from rest_framework.permissions import IsAuthenticated
+from assets.models import AssetHistory, Asset
+from rest_framework import generics
+from assets.serializers.asset_serializers import AssetHistoryListSerializer
+
+
+# Need to check if there is a django built in model for history like this
+class AssetHistoryListAPIView(generics.ListAPIView):
+    queryset = Asset.objects.prefetch_related(
+        Prefetch(
+            'assets',
+            AssetHistory.objects
+            .select_related('previous_user','new_user')
+            .order_by('-change_date')
+        )
+    )
+    serializer_class = AssetHistoryListSerializer
+    permission_classes = [IsAuthenticated]
 
 
 # Asset History Section

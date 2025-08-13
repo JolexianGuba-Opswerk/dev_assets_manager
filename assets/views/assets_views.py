@@ -1,8 +1,9 @@
 from django_filters.rest_framework import DjangoFilterBackend
 
+from assets.filters import AssetFilter
 from assets.models import Asset
 from django.contrib.auth.models import User
-from rest_framework import generics
+from rest_framework import generics, filters
 from assets.serializers.asset_serializers import (AssetListSerializer, AssetCreateSerializer,
                                                   AssetDetailSerializer, UserAssetListSerializer)
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -13,8 +14,15 @@ class AssetListCreateAPIView(generics.ListCreateAPIView):
     queryset = Asset.objects.select_related('category', 'assigned_to').order_by('-id')
     serializer_class = AssetListSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'status']
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter
+    ]
+    filterset_class = AssetFilter
+    ordering_fields = ['purchased_date', 'name']
+    search_fields = ['name','serial_number','description']
+
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -48,6 +56,7 @@ class AssetDetailsView(generics.RetrieveUpdateDestroyAPIView):
 class UserAssetDetailsView(generics.ListAPIView):
     queryset = User.objects.select_related('employee_profile__department').prefetch_related('assets__category')
     serializer_class = UserAssetListSerializer
+    permission_classes = [IsAuthenticated]
 
 
 

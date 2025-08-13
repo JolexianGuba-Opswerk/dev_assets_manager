@@ -1,3 +1,4 @@
+from assets.tasks import send_welcome_email
 from rest_framework import serializers
 from assets.models import Asset, Department, Category, EmployeeProfile
 from django.contrib.auth.models import User
@@ -37,20 +38,27 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
             'password': {'write_only': True}
         }
 
-    def create(self, validated_data):
+    def create(self, validated_data, ):
         department = validated_data.pop('department')
-        position = validated_data.pop('position', "")
-
+        position = validated_data.pop('position', "").title()
         password = validated_data.pop('password')
+
+        first_name = validated_data.get('first_name', '').strip().title()
+        last_name = validated_data.get('last_name', '').strip().title()
+        full_name = f"{first_name} {last_name}".strip()
+
         user = User(**validated_data)
         user.set_password(password)
         user.save()
 
-        EmployeeProfile.objects.create(
+        employee_profile = EmployeeProfile.objects.create(
             user=user,
             department=Department.objects.get(name=department),
             position=position
         )
+        department_name = employee_profile.department.full_name.title()
+        send_welcome_email.delay(user.email, full_name, department_name, position)
+
         return user
 
 
@@ -67,7 +75,7 @@ class EmployeeUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name',
-                  'email', 'department', 'position']
+                  'email', 'department', 'position', 'password']
 
         extra_kwargs = {
             'password': {'write_only': True}
@@ -99,7 +107,4 @@ class EmployeeSideUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name',
-                  'email', 'password']
-        write_only_fields = 'password'
-
-
+                  'email']

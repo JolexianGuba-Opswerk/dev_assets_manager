@@ -57,23 +57,30 @@ class AssetCreateSerializer(serializers.ModelSerializer):
         return asset
 
     def update(self, instance, validated_data):
-        notes = validated_data.pop('notes', "")
+        notes = validated_data.pop('notes', None)
+        print("history-notes:", notes)
         new_user = validated_data.get('assigned_to', None)
         old_user = instance.assigned_to
 
-
-        print(validated_data.get('status'))
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
         instance.save()
-        if 'assigned_to' in validated_data:
+
+        if 'assigned_to' in validated_data and old_user != new_user:
             AssetHistory.objects.create(
                 asset=instance,
                 previous_user=old_user,
                 new_user=new_user,
                 notes=notes
             )
+
+        if notes :
+            current_history = AssetHistory.objects.filter(asset=instance).order_by('-change_date').first()
+            current_history.notes = notes
+            print("history-notes:",current_history.notes)
+            current_history.save()
+
         return instance
 
 
@@ -138,13 +145,21 @@ class UserAssetListSerializer(serializers.ModelSerializer):
 class AssetHistorySerializer(serializers.ModelSerializer):
     new_user = serializers.StringRelatedField()
     previous_user = serializers.StringRelatedField()
+    asset = serializers.SerializerMethodField()
+
     class Meta:
         model = AssetHistory
-        fields = ['previous_user', 'new_user', 'change_date', 'notes']
+        fields = ['previous_user', 'new_user', 'change_date', 'notes', 'asset']
 
+    def get_asset(self, obj):
+        return {
+            "name": obj.asset.name,
+            "serial_number": obj.asset.serial_number
 
-class AssetHistoryListSerializer(serializers.ModelSerializer):
-    history = AssetHistorySerializer(many=True, source='assets')
+        }
+
+class UserAssetSerializer(serializers.ModelSerializer):
+    assets = AssetListSerializer(many=True)
     class Meta:
-        model = Asset
-        fields = ['id','name', 'serial_number', 'history']
+        model = User
+        fields = ['username', 'email', 'assets']

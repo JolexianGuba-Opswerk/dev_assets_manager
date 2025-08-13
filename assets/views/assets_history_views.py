@@ -4,25 +4,26 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from rest_framework.permissions import IsAuthenticated
 from assets.models import AssetHistory, Asset
-from rest_framework import generics
-from assets.serializers.asset_serializers import AssetHistoryListSerializer
+from rest_framework import generics, filters
+from assets.serializers.asset_serializers import AssetHistorySerializer
 
 
 # Need to check if there is a django built in model for history like this
 class AssetHistoryListAPIView(generics.ListAPIView):
-    queryset = Asset.objects.prefetch_related(
-        Prefetch(
-            'assets',
-            AssetHistory.objects
-            .select_related('previous_user','new_user')
-            .order_by('-change_date')
-        )
-    )
-    serializer_class = AssetHistoryListSerializer
+    queryset = (AssetHistory.objects
+                .prefetch_related('previous_user','new_user')
+                .order_by('-id'))
+
+    serializer_class = AssetHistorySerializer
     permission_classes = [IsAuthenticated]
 
+    filter_backends = [
+        filters.SearchFilter
+    ]
+    search_fields = ['assets__name']
 
-# Asset History Section
+
+# Asset History Sectiona
 @csrf_exempt
 @require_http_methods(["GET"])
 def asset_history_list(request):

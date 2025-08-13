@@ -21,7 +21,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=25),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -171,4 +171,13 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-CELERY_BROKER_URL = ""
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'devassetsmanager@gmail.com'
+EMAIL_HOST_PASSWORD = 'kckd rdgd ftdu uuvi'

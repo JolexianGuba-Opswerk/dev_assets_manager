@@ -1,4 +1,4 @@
-# decompyle3 version 3.9.2
+# uncompyle6 version 3.9.2
 # Python bytecode version base 3.12.0 (3531)
 # Decompiled from: Python 3.13.3 (main, Jun 16 2025, 18:15:32) [GCC 14.2.0]
 # Embedded file name: /Users/Jolexian/Developer/devAssetsManager/devassets_manager/settings.py

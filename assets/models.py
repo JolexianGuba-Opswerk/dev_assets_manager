@@ -51,7 +51,7 @@ class Asset(models.Model):
 
 # Asset History model
 class AssetHistory(models.Model):
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name='assets')
     previous_user = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name='previous_assets'
     )

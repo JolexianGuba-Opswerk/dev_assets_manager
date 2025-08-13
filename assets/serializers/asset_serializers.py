@@ -36,7 +36,6 @@ class CategorySerializer(serializers.ModelSerializer):
 class AssetCreateSerializer(serializers.ModelSerializer):
     notes = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
-
     class Meta:
         model = Asset
         fields = ['name', 'serial_number', 'category', 'assigned_to',

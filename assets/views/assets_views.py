@@ -22,6 +22,7 @@ class AssetListCreateAPIView(generics.ListCreateAPIView):
         DjangoFilterBackend,
         filters.SearchFilter
     ]
+
     filterset_class = AssetFilter
     ordering_fields = ['purchased_date', 'name']
     search_fields = ['name','serial_number','description']

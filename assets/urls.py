@@ -11,9 +11,9 @@ urlpatterns = [
     path('assets/<int:id>/', AssetDetailsView.as_view(), name='asset_list_detail'),
     path('assets/employee/', UserAssetDetailsView.as_view(), name='employee_assets'),
     # Employee Routes
-    path('employees/', EmployeeListCreateAPIView.as_view(), name='employee_details'),
+    path('employees/', EmployeeListCreateAPIView.as_view(), name='employee_list_create'),
     path('employees/<int:id>/', EmployeeDetailsView.as_view(), name='employee_details'),
-    path('employees-side/<int:id>/', EmployeeSideDetailsUpdate.as_view(), name='employee_details'),
+    path('employees-side/<int:id>/', EmployeeSideDetailsUpdate.as_view(), name='employee_side_details'),
     path('employees-side/asset/<int:id>/', UserOwnAssetDetailsAPIView.as_view(), name='employee_assets_details'),
     path('assets/history/', AssetHistoryListAPIView.as_view(), name='asset_history_list'),
 

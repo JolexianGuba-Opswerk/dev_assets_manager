@@ -57,7 +57,6 @@ class AssetCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         notes = validated_data.pop('notes', None)
-        print("history-notes:", notes)
         new_user = validated_data.get('assigned_to', None)
         old_user = instance.assigned_to
 

@@ -1,26 +1,32 @@
+import time
 from django_filters.rest_framework import DjangoFilterBackend
 from assets.filters import EmployeeFilter
-from assets.models import Department, EmployeeProfile
 from django.contrib.auth.models import User
-from django.db import connection, IntegrityError
-
 from assets.permissions import IsOwnerOrReadOnly
 from assets.serializers.employee_serializers import EmployeeListSerializer, EmployeeCreateSerializer, \
     EmployeeSideUpdateSerializer, EmployeeUpdateSerializer
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 
 class EmployeeListCreateAPIView(generics.ListCreateAPIView):
-    # Add django-filtering in here...
     queryset = User.objects.select_related('employee_profile','employee_profile__department').order_by('-id')
     serializer_class = EmployeeListSerializer
     permission_classes = [IsAdminUser, IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = EmployeeFilter
-    search_fields = ["username","=email"]
+    search_fields = ["username", "=email"]
 
+    @method_decorator(cache_page(60 * 15, key_prefix='employee_list'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        time.sleep(2)
+        return super().get_queryset()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -56,12 +62,6 @@ class EmployeeSideDetailsUpdate(generics.UpdateAPIView):
     permission_classes = [IsOwnerOrReadOnly]
     serializer_class = EmployeeSideUpdateSerializer
     lookup_field = 'id'
-
-
-# Create ForgetPasswordView
-class UserForgetPasswordAPIView(generics.CreateAPIView):
-    pass
-
 
 
 

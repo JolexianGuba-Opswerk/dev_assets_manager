@@ -12,6 +12,7 @@ from assets.serializers.asset_serializers import (AssetListSerializer, AssetCrea
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 import time
 
+
 # CREATE/GET view for Asset
 class AssetListCreateAPIView(generics.ListCreateAPIView):
     queryset = Asset.objects.select_related('category', 'assigned_to').order_by('-id')
@@ -22,8 +23,8 @@ class AssetListCreateAPIView(generics.ListCreateAPIView):
         DjangoFilterBackend,
         filters.SearchFilter
     ]
-
     filterset_class = AssetFilter
+
     ordering_fields = [
         'purchased_date',
         'name'
@@ -75,7 +76,7 @@ class AssetDetailsView(generics.RetrieveUpdateDestroyAPIView):
 class UserAssetDetailsView(generics.ListAPIView):
     queryset = (User.objects
                 .select_related('employee_profile__department')
-                .prefetch_related('assets__category'))
+                .prefetch_related('assets__category')).order_by('-id')
     serializer_class = UserAssetListSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
 
@@ -98,13 +99,6 @@ class UserOwnAssetDetailsAPIView(generics.RetrieveAPIView):
     )
     serializer_class = UserAssetSerializer
     lookup_field = 'id'
-
-
-
-
-
-
-
 
 
 

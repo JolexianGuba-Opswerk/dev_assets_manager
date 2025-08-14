@@ -1,10 +1,4 @@
-from pprint import pprint
-from django.core.exceptions import ValidationError
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from django_filters.rest_framework import DjangoFilterBackend
-
 from assets.filters import EmployeeFilter
 from assets.models import Department, EmployeeProfile
 from django.contrib.auth.models import User
@@ -63,6 +57,10 @@ class EmployeeSideDetailsUpdate(generics.UpdateAPIView):
     serializer_class = EmployeeSideUpdateSerializer
     lookup_field = 'id'
 
+
+# Create ForgetPasswordView
+class UserForgetPasswordAPIView(generics.CreateAPIView):
+    pass
 
 
 

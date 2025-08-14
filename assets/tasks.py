@@ -19,6 +19,34 @@ def send_welcome_email(user_email, full_name, department, position):
 
     text_content = strip_tags(html_content)
 
-    email = EmailMultiAlternatives(subject, text_content, "noreply@dev_asset_manager.com", [user_email])
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        "noreply@dev_asset_manager.com",
+        [user_email])
     email.attach_alternative(html_content, "text/html")
     email.send()
+
+
+@shared_task
+def send_otp_email(email, otp):
+    current_year = timezone.now().year
+    subject = "Your Dev Assets Manager OTP (Valid for 10 minutes)"
+
+    html_content = render_to_string('emails/otp_email.html', {
+        'email': email,
+        'otp': otp,
+        'current_year': current_year
+    })
+
+    text_content = strip_tags(html_content)
+
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        "noreply@dev_asset_manager.com",
+        [email])
+
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+

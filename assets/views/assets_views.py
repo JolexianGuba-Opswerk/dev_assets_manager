@@ -1,16 +1,16 @@
 from django.db.models import Prefetch
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from assets.filters import AssetFilter
 from assets.models import Asset
 from django.contrib.auth.models import User
 from rest_framework import generics, filters
-
 from assets.permissions import IsOwnerOrReadOnly, IsOwnerAssetsOrReadOnly
 from assets.serializers.asset_serializers import (AssetListSerializer, AssetCreateSerializer,
                                                   AssetDetailSerializer, UserAssetListSerializer, UserAssetSerializer)
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
+import time
 
 # CREATE/GET view for Asset
 class AssetListCreateAPIView(generics.ListCreateAPIView):
@@ -24,9 +24,24 @@ class AssetListCreateAPIView(generics.ListCreateAPIView):
     ]
 
     filterset_class = AssetFilter
-    ordering_fields = ['purchased_date', 'name']
-    search_fields = ['name','serial_number','description']
+    ordering_fields = [
+        'purchased_date',
+        'name'
+    ]
+    search_fields = [
+        'name',
+        'serial_number',
+        'description'
+    ]
 
+    # 15 MINUTES OF CACHING
+    @method_decorator(cache_page(60 * 15, key_prefix='asset_list'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, request, *args, **kwargs)
+
+    def get_queryset(self):
+        time.sleep(2)
+        return super().get_queryset()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -85,9 +100,7 @@ class UserOwnAssetDetailsAPIView(generics.RetrieveAPIView):
     lookup_field = 'id'
 
 
-# Create ForgetPasswordView
-class UserForgetPasswordAPIView(generics.CreateAPIView):
-    pass
+
 
 
 

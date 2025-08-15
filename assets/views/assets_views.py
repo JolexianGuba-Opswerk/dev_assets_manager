@@ -24,7 +24,8 @@ class AssetListCreateAPIView(generics.ListCreateAPIView):
 
     filter_backends = [
         DjangoFilterBackend,
-        filters.SearchFilter
+        filters.SearchFilter,
+        filters.OrderingFilter
     ]
     filterset_class = AssetFilter
 

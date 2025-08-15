@@ -13,12 +13,17 @@ from django.views.decorators.cache import cache_page
 
 logger = logging.getLogger('assets')
 
+
 class EmployeeListCreateAPIView(generics.ListCreateAPIView):
     queryset = User.objects.select_related('employee_profile','employee_profile__department').order_by('-id')
     serializer_class = EmployeeListSerializer
     permission_classes = [IsAdminUser, IsAuthenticated]
 
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter
+    ]
     filterset_class = EmployeeFilter
     search_fields = ["username", "=email"]
 
@@ -59,8 +64,8 @@ class EmployeeDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # User side, updating own credentials only
-class EmployeeSideDetailsUpdate(generics.UpdateAPIView):
+class EmployeeSideDetailsUpdate(generics.RetrieveUpdateAPIView):
     queryset = User.objects.select_related('employee_profile', 'employee_profile__department')
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
     serializer_class = EmployeeSideUpdateSerializer
     lookup_field = 'id'

@@ -5,3 +5,4 @@ __pycache__/
 dump.rdb
 staticfiles/
 devassets_manager/logs
+docker

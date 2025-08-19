@@ -76,7 +76,6 @@ class AssetCreateSerializer(serializers.ModelSerializer):
         if notes :
             current_history = AssetHistory.objects.filter(asset=instance).order_by('-change_date').first()
             current_history.notes = notes
-            print("history-notes:",current_history.notes)
             current_history.save()
 
         return instance
@@ -113,6 +112,7 @@ class AssetDetailSerializer(serializers.ModelSerializer):
         return obj.category.name if obj.category else None
 
 
+# Nested Serializer for our Employee Asset
 class UserAssetDetailSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
     class Meta:
@@ -129,7 +129,8 @@ class UserAssetListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'employee_profile', 'assets']
+        fields = ['id', 'username', 'first_name', 'last_name',
+                  'email', 'employee_profile', 'assets']
 
     def get_employee_profile(self, obj):
         if obj.employee_profile:

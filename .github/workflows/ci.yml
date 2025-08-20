@@ -30,7 +30,7 @@ jobs:
       - name: Run Ruff checks
         run: |
           ruff .
-          
+
 
       - name: Run Black checks
         run: |

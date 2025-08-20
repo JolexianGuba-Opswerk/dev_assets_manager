@@ -1,0 +1,31 @@
+FROM python:3.11-slim AS builder
+
+WORKDIR /app
+
+# Install build tools then remove caches after
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential gcc libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installing requirement.txt before getting whole dir
+COPY ../requirements.txt .
+RUN pip install --upgrade pip && \
+     pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY --from=builder /install /usr/local
+
+COPY .. .
+
+EXPOSE 8000
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+
+
+

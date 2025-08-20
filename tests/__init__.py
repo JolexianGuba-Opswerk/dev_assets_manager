@@ -1,0 +1,2 @@
+from tests.test_employee import EmployeeAPITest
+from tests.test_asset import AssetAPITest

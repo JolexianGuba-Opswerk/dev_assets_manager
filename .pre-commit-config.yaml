@@ -24,7 +24,7 @@ repos:
     hooks:
       - id: django-test-check
         name: Run Django tests
-        entry: python manage.py test tests
+        entry: docker exec -t devassetsmanager-web-1 python manage.py test tests
         language: system
         pass_filenames: false
         always_run: true

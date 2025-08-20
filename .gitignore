@@ -5,6 +5,7 @@ __pycache__/
 dump.rdb
 staticfiles/
 devassets_manager/logs
-db-dumps
+db-dumps/
 .ruff_cache
 .idea
+docker/

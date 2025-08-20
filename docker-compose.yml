@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:17
     restart: always
-    env_file: ../.env
+    env_file: .env
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
@@ -24,7 +24,7 @@ services:
       - .:/app
     ports:
       - "8000:8000"
-    env_file: ../.env
+    env_file: .env
     depends_on:
         db:
           condition: service_healthy
@@ -32,7 +32,7 @@ services:
   migrate:
     build: ..
     command: sh -c "python manage.py makemigrations && python manage.py migrate"
-    env_file: ../.env
+    env_file: .env
     depends_on:
       db:
         condition: service_healthy
@@ -51,7 +51,7 @@ services:
     command: celery -A devassets_manager worker -l info
     volumes:
       - .:/app
-    env_file: ../.env
+    env_file: .env
     depends_on:
       redis:
         condition: service_healthy

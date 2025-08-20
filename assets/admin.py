@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Asset, AssetHistory, Department, Category, EmployeeProfile
+
+from .models import Asset, AssetHistory, Category, Department, EmployeeProfile
 
 admin.site.register(Asset)
 admin.site.register(AssetHistory)

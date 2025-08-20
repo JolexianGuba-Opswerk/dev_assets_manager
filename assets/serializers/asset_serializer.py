@@ -1,12 +1,13 @@
-from rest_framework import serializers
-from assets.models import Asset, Department, Category, EmployeeProfile, AssetHistory
 from django.contrib.auth.models import User
+from rest_framework import serializers
+
+from assets.models import Asset, AssetHistory, Category, Department, EmployeeProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'email')
+        fields = ("username", "first_name", "last_name", "email")
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -14,7 +15,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Department
-        fields = ['name', 'full_name', 'created_at', 'added_by']
+        fields = ["name", "full_name", "created_at", "added_by"]
 
 
 class EmployeeProfileSerializer(serializers.ModelSerializer):
@@ -23,14 +24,14 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmployeeProfile
-        fields = ['user', 'department', 'position']
+        fields = ["user", "department", "position"]
 
 
 # ASSET SERIALIZERS
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name']
+        fields = ["name"]
 
 
 class AssetCreateSerializer(serializers.ModelSerializer):
@@ -38,26 +39,31 @@ class AssetCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ['name', 'serial_number', 'category', 'assigned_to',
-                  'purchase_date', 'status', 'description', 'notes']
+        fields = [
+            "name",
+            "serial_number",
+            "category",
+            "assigned_to",
+            "purchase_date",
+            "status",
+            "description",
+            "notes",
+        ]
 
     def create(self, validated_data):
-        notes = validated_data.pop('notes', "")
-        assigned_to = validated_data.get('assigned_to', None)
+        notes = validated_data.pop("notes", "")
+        assigned_to = validated_data.get("assigned_to", None)
         asset = Asset.objects.create(**validated_data)
 
         if assigned_to:
             AssetHistory.objects.create(
-                asset=asset,
-                previous_user=None,
-                new_user=assigned_to,
-                notes=notes
+                asset=asset, previous_user=None, new_user=assigned_to, notes=notes
             )
         return asset
 
     def update(self, instance, validated_data):
-        notes = validated_data.pop('notes', None)
-        new_user = validated_data.get('assigned_to', None)
+        notes = validated_data.pop("notes", None)
+        new_user = validated_data.get("assigned_to", None)
         old_user = instance.assigned_to
 
         for attr, value in validated_data.items():
@@ -65,16 +71,17 @@ class AssetCreateSerializer(serializers.ModelSerializer):
 
         instance.save()
 
-        if 'assigned_to' in validated_data and old_user != new_user:
+        if "assigned_to" in validated_data and old_user != new_user:
             AssetHistory.objects.create(
-                asset=instance,
-                previous_user=old_user,
-                new_user=new_user,
-                notes=notes
+                asset=instance, previous_user=old_user, new_user=new_user, notes=notes
             )
 
-        if notes :
-            current_history = AssetHistory.objects.filter(asset=instance).order_by('-change_date').first()
+        if notes:
+            current_history = (
+                AssetHistory.objects.filter(asset=instance)
+                .order_by("-change_date")
+                .first()
+            )
             current_history.notes = notes
             current_history.save()
 
@@ -86,7 +93,7 @@ class AssetListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ['id', 'name', 'serial_number', 'category', 'status', 'description']
+        fields = ["id", "name", "serial_number", "category", "status", "description"]
 
     def get_category(self, obj):
         return obj.category.name if obj.category else None
@@ -98,13 +105,22 @@ class AssetDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ['id', 'name', 'serial_number', 'category', 'assigned_to', 'purchase_date', 'status', 'description']
+        fields = [
+            "id",
+            "name",
+            "serial_number",
+            "category",
+            "assigned_to",
+            "purchase_date",
+            "status",
+            "description",
+        ]
 
     def get_assigned_to(self, obj):
         if obj.assigned_to:
             return {
-                'name': obj.assigned_to.get_full_name(),
-                'email': obj.assigned_to.email
+                "name": obj.assigned_to.get_full_name(),
+                "email": obj.assigned_to.email,
             }
         return None
 
@@ -115,9 +131,10 @@ class AssetDetailSerializer(serializers.ModelSerializer):
 # Nested Serializer for our Employee Asset
 class UserAssetDetailSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
+
     class Meta:
         model = Asset
-        fields = ['id', 'name', 'serial_number', 'category']
+        fields = ["id", "name", "serial_number", "category"]
 
     def get_category(self, obj):
         return obj.category.name if obj.category else None
@@ -129,14 +146,21 @@ class UserAssetListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name',
-                  'email', 'employee_profile', 'assets']
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "employee_profile",
+            "assets",
+        ]
 
     def get_employee_profile(self, obj):
         if obj.employee_profile:
             return {
-                'department': obj.employee_profile.department.full_name,
-                'position': obj.employee_profile.position
+                "department": obj.employee_profile.department.full_name,
+                "position": obj.employee_profile.position,
             }
         return None
 
@@ -148,17 +172,15 @@ class AssetHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AssetHistory
-        fields = ['previous_user', 'new_user', 'change_date', 'notes', 'asset']
+        fields = ["previous_user", "new_user", "change_date", "notes", "asset"]
 
     def get_asset(self, obj):
-        return {
-            "name": obj.asset.name,
-            "serial_number": obj.asset.serial_number
+        return {"name": obj.asset.name, "serial_number": obj.asset.serial_number}
 
-        }
 
 class UserAssetSerializer(serializers.ModelSerializer):
     assets = AssetListSerializer(many=True)
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'assets']
+        fields = ["username", "email", "assets"]

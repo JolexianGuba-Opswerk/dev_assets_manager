@@ -6,7 +6,7 @@ redis_client = redis.StrictRedis(
     port=settings.REDIS_PORT,
     db=settings.REDIS_DB,
     password=settings.REDIS_PASSWORD,
-    decode_responses=True
+    decode_responses=True,
 )
 
 try:

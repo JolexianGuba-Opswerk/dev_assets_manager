@@ -1,0 +1,6 @@
+
+select = ["F", "I", "B", "W", ]
+extend-exclude = [
+    "assets/tests", "assets/serializers/__init__.py",
+    "assets/views/__init__.py", "tests/__init__.py"
+]

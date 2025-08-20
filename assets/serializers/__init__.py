@@ -1,4 +1,11 @@
-from assets.serializers.asset_serializers import (UserSerializer, DepartmentSerializer, EmployeeProfileSerializer,
-                                                  CategorySerializer, AssetCreateSerializer, AssetListSerializer, UserAssetListSerializer)
+from assets.serializers.asset_serializer import (
+    UserSerializer,
+    DepartmentSerializer,
+    EmployeeProfileSerializer,
+    CategorySerializer,
+    AssetCreateSerializer,
+    AssetListSerializer,
+    UserAssetListSerializer,
+)
 
-from assets.serializers.employee_serializers import (EmployeeListSerializer)
+from assets.serializers.employee_serializer import EmployeeListSerializer

@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           # Install ruff and black first, then your project dependencies
-          pip install ruff==0.0.272 black==25.1.0
+          pip install ruff==0.12.9 black==25.1.0
           pip install -r requirements.txt
 
       - name: Run Ruff checks

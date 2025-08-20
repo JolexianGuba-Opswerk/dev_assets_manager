@@ -1,0 +1,30 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: check-yaml
+      - id: detect-private-key
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.1.0
+    hooks:
+      - id: black
+        language_version: python3.11
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.272
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+
+  - repo: local
+    hooks:
+      - id: django-test-check
+        name: Run Django tests
+        entry: docker exec -t devassetsmanager-web-1 python manage.py test tests
+        language: system
+        pass_filenames: false
+        always_run: true

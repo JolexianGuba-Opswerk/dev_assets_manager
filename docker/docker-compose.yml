@@ -1,10 +1,9 @@
-version: "3.9"
 
 services:
   db:
     image: postgres:17
     restart: always
-    env_file: .env
+    env_file: ../.env
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USER}
@@ -12,27 +11,28 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./docker/pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
 
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
 
+
   web:
-    build: .
+    build: ..
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
       - "8000:8000"
-    env_file: .env
+    env_file: ../.env
     depends_on:
         db:
           condition: service_healthy
 
   migrate:
-    build: .
+    build: ..
     command: sh -c "python manage.py makemigrations && python manage.py migrate"
-    env_file: .env
+    env_file: ../.env
     depends_on:
       db:
         condition: service_healthy
@@ -47,12 +47,14 @@ services:
       test: ["CMD", "redis-cli", "ping"]
 
   celery:
-    build: .
+    build: ..
     command: celery -A devassets_manager worker -l info
     volumes:
       - .:/app
-    env_file: .env
+    env_file: ../.env
     depends_on:
       redis:
         condition: service_healthy
 
+volumes:
+    pg-data:

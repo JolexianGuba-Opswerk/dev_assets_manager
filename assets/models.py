@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 
 class Department(models.Model):
@@ -23,7 +23,9 @@ class Category(models.Model):
 
 # Employee model
 class EmployeeProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="employee_profile"
+    )
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     position = models.CharField(max_length=100)
 
@@ -31,18 +33,27 @@ class EmployeeProfile(models.Model):
 # Asset model
 class Asset(models.Model):
     STATUS_CHOICES = [
-        ('IN_USE', 'In Use'),
-        ('IN_STORAGE', 'In Storage'),
-        ('REPAIR', 'Under Repair'),
-        ('RETIRED', 'Retired'),
+        ("IN_USE", "In Use"),
+        ("IN_STORAGE", "In Storage"),
+        ("REPAIR", "Under Repair"),
+        ("RETIRED", "Retired"),
     ]
 
     name = models.CharField(max_length=100)
     serial_number = models.CharField(max_length=100, unique=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, default=None, null=True, blank=True, related_name='assets')
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        default=None,
+        null=True,
+        blank=True,
+        related_name="assets",
+    )
     purchase_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='IN_STORAGE')
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="IN_STORAGE"
+    )
     description = models.TextField(blank=True)
 
     def __str__(self):
@@ -51,15 +62,17 @@ class Asset(models.Model):
 
 # Asset History model
 class AssetHistory(models.Model):
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name='assets')
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name="assets")
     previous_user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='previous_assets'
+        User, on_delete=models.SET_NULL, null=True, related_name="previous_assets"
     )
     new_user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='new_assets'
+        User, on_delete=models.SET_NULL, null=True, related_name="new_assets"
     )
     change_date = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.asset.name} reassigned on {self.change_date.strftime('%Y-%m-%d')}"
+        return (
+            f"{self.asset.name} reassigned on {self.change_date.strftime('%Y-%m-%d')}"
+        )

@@ -1,7 +1,8 @@
 import logging
 import time
 
-logger = logging.getLogger('assets')
+logger = logging.getLogger("assets")
+
 
 class DetailedLoggingMiddleware:
     def __init__(self, get_response):
@@ -32,6 +33,6 @@ class DetailedLoggingMiddleware:
             # Exception log
             logger.error(
                 f"[EXCEPTION] {request.method} {request.get_full_path()} | Error: {e}",
-                exc_info=True
+                exc_info=True,
             )
             raise

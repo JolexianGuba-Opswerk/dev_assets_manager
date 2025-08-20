@@ -1,2 +1,5 @@
 .gitignore
 venv
+.idea
+.github
+ruff.toml

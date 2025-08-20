@@ -1,4 +1,5 @@
 import random
+
 from assets.redis_client import redis_client
 
 # 10 mins

@@ -15,60 +15,173 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Asset',
+            name="Asset",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('serial_number', models.CharField(max_length=100, unique=True)),
-                ('purchase_date', models.DateField()),
-                ('status', models.CharField(choices=[('IN_USE', 'In Use'), ('IN_STORAGE', 'In Storage'), ('REPAIR', 'Under Repair'), ('RETIRED', 'Retired')], default='IN_STORAGE', max_length=20)),
-                ('description', models.TextField(blank=True)),
-                ('assigned_to', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("serial_number", models.CharField(max_length=100, unique=True)),
+                ("purchase_date", models.DateField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("IN_USE", "In Use"),
+                            ("IN_STORAGE", "In Storage"),
+                            ("REPAIR", "Under Repair"),
+                            ("RETIRED", "Retired"),
+                        ],
+                        default="IN_STORAGE",
+                        max_length=20,
+                    ),
+                ),
+                ("description", models.TextField(blank=True)),
+                (
+                    "assigned_to",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='AssetHistory',
+            name="AssetHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('change_date', models.DateTimeField(auto_now_add=True)),
-                ('notes', models.TextField(blank=True)),
-                ('asset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='assets.asset')),
-                ('new_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='new_assets', to=settings.AUTH_USER_MODEL)),
-                ('previous_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='previous_assets', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("change_date", models.DateTimeField(auto_now_add=True)),
+                ("notes", models.TextField(blank=True)),
+                (
+                    "asset",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="assets.asset"
+                    ),
+                ),
+                (
+                    "new_user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="new_assets",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "previous_user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="previous_assets",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Category',
+            name="Category",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('added_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "added_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='asset',
-            name='category',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='assets.category'),
+            model_name="asset",
+            name="category",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="assets.category",
+            ),
         ),
         migrations.CreateModel(
-            name='Department',
+            name="Department",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, unique=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('added_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, unique=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "added_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='EmployeeProfile',
+            name="EmployeeProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('full_name', models.CharField(max_length=100)),
-                ('email', models.EmailField(max_length=254, unique=True)),
-                ('position', models.CharField(max_length=100)),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='assets.department')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("full_name", models.CharField(max_length=100)),
+                ("email", models.EmailField(max_length=254, unique=True)),
+                ("position", models.CharField(max_length=100)),
+                (
+                    "department",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="assets.department",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

@@ -6,7 +6,7 @@ from rest_framework.test import APIClient, APITestCase
 from assets.models import Department, EmployeeProfile
 
 
-class employee_tests(APITestCase):
+class employees_tests(APITestCase):
     def setUp(self):
         self.client = APIClient()
         # Admin User & Normal User Creation

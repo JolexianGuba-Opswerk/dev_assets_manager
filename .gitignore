@@ -7,3 +7,4 @@ staticfiles/
 devassets_manager/logs
 db-dumps
 .ruff_cache
+.idea

@@ -17,3 +17,4 @@ redis~=6.4.0
 django-redis
 black~=25.1.0
 ruff~=0.12.9
+pre-commit~=4.3.0

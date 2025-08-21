@@ -2,6 +2,7 @@
 services:
   db:
     image: postgres:17
+    container_name: dam-db
     restart: always
     env_file: .env
     environment:
@@ -18,8 +19,9 @@ services:
 
 
   web:
-    build: ..
+    build: .
     command: python manage.py runserver 0.0.0.0:8000
+    container_name: dam-web
     volumes:
       - .:/app
     ports:
@@ -30,7 +32,8 @@ services:
           condition: service_healthy
 
   migrate:
-    build: ..
+    build: .
+    container_name: dam-migrate
     command: sh -c "python manage.py makemigrations && python manage.py migrate"
     env_file: .env
     depends_on:
@@ -41,14 +44,16 @@ services:
   redis:
     image: redis:7
     restart: always
+    container_name: dam-redis
     ports:
       - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
 
   celery:
-    build: ..
+    build: .
     command: celery -A devassets_manager worker -l info
+    container_name: dam-celery
     volumes:
       - .:/app
     env_file: .env

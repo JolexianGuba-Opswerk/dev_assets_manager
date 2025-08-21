@@ -157,12 +157,17 @@ class UserAssetListSerializer(serializers.ModelSerializer):
         ]
 
     def get_employee_profile(self, obj):
-        if obj.employee_profile:
-            return {
-                "department": obj.employee_profile.department.full_name,
-                "position": obj.employee_profile.position,
-            }
-        return None
+        profile = getattr(obj, "employee_profile", None)
+        if not profile:
+            return None
+
+        department_name = getattr(profile.department, "full_name", None)
+        position = getattr(profile, "position", None)
+
+        return {
+            "department": department_name,
+            "position": position,
+        }
 
 
 class AssetHistorySerializer(serializers.ModelSerializer):

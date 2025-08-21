@@ -64,6 +64,7 @@ class AssetDetailsView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Asset.objects.select_related("assigned_to", "category")
     serializer_class = AssetCreateSerializer
     lookup_field = "id"
+    permission_classes = [IsAdminUser]
 
     def get_serializer_class(self):
         if self.request.method == "GET":

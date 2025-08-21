@@ -26,8 +26,11 @@ class EmployeeProfile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="employee_profile"
     )
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    position = models.CharField(max_length=100)
+    department = models.ForeignKey(
+        Department, on_delete=models.CASCADE, blank=True, null=True
+    )
+    position = models.CharField(max_length=100, blank=True, null=True)
+    avatar_url = models.TextField(blank=True, null=True)
 
 
 # Asset model

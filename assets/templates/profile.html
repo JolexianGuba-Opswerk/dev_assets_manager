@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OIDC Test - Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'assets/css/profile.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-shield-alt logo-icon"></i>
+                <span>OIDC Testing Portal</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="left-column">
+                <div class="card">
+                    <div class="profile-header">
+                        <div class="avatar">
+                            {% if picture %}
+                                <img src="{{ picture }}" alt="Profile Picture">
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <h1 class="profile-name">{{ first_name }} {{ last_name }}</h1>
+                        <p class="profile-email">{{ email }}</p>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="info-grid">
+                        <div class="info-group">
+                            <p class="info-label">First Name</p>
+                            <p class="info-value">{{ first_name }}</p>
+                        </div>
+
+                        <div class="info-group">
+                            <p class="info-label">Last Name</p>
+                            <p class="info-value">{{ last_name }}</p>
+                        </div>
+
+                        <div class="info-group">
+                            <p class="info-label">Authentication</p>
+                            <p class="info-value">Google OIDC</p>
+                        </div>
+
+                        <div class="info-group">
+                            <p class="info-label">Status</p>
+                            <p class="info-value" style="color: var(--secondary);">Verified <i class="fas fa-check-circle"></i></p>
+                        </div>
+                    </div>
+
+                    <div class="oidc-info">
+                        <i class="fas fa-info-circle"></i> You are logged in via Google OpenID Connect. This is a test authentication flow.
+                    </div>
+
+                    <a href="{% url 'logout' %}" class="btn btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

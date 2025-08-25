@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Demo | OIDC Testing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'assets/css/home.css' %}">
+
+
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-shield-alt logo-icon"></i>
+                <span>OIDC Testing Portal</span>
+            </div>
+            <p class="tagline">Test authentication flows with Google OpenID Connect</p>
+        </header>
+
+        <div class="card">
+            <h1 class="welcome-text">Welcome to OIDC Testing!</h1>
+
+            {% if user.is_authenticated %}
+                <div class="user-info">
+                    <p class="user-email">
+                        <i class="fas fa-check-circle" style="color: var(--secondary);"></i>
+                        You are authenticated as <strong>{{ user.email }}</strong>
+                    </p>
+                </div>
+
+                <a href="{% url 'profile' %}" class="btn">
+                    <i class="fas fa-user-circle"></i> Go to Profile
+                </a>
+
+                <div class="divider">
+                    <span class="divider-text">or</span>
+                </div>
+
+                <form method="post" action="{% url 'oidc_logout' %}" style="width: 100%;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            {% else %}
+                <p>Sign in with your Google account to test the OpenID Connect implementation</p>
+
+                <div class="divider">
+                    <span class="divider-text">Sign in with</span>
+                </div>
+
+                <a href="{% url 'oidc_authentication_init' %}" class="btn btn-google">
+                    <span class="google-icon"></span>
+                    Login with Google
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

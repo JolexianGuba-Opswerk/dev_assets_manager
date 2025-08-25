@@ -10,3 +10,4 @@ from assets.views.employee_views import (
     EmployeeDetailsView,
     EmployeeSideDetailsUpdate,
 )
+from assets.views.oidc_views import profile_view, logout_view

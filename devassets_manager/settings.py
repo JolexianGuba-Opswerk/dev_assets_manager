@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     "assets",
     "django_extensions",
     "django_filters",
+    # Mozilla OIDC
+    "mozilla_django_oidc",
 ]
 
 # Middleware
@@ -49,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "devassets_manager.middleware.DetailedLoggingMiddleware",
+    "mozilla_django_oidc.middleware.SessionRefresh",
 ]
 
 ROOT_URLCONF = "devassets_manager.urls"
@@ -75,10 +78,10 @@ WSGI_APPLICATION = "devassets_manager.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DATABASE_NAME", "postgres"),
-        "USER": os.getenv("DATABASE_USER", "postgres"),
-        "PASSWORD": os.getenv("DATABASE_PASSWORD", ""),
-        "HOST": os.getenv("DATABASE_HOST", "db"),
+        "NAME": os.getenv("DATABASE_NAME"),
+        "USER": os.getenv("DATABASE_USER"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
+        "HOST": os.getenv("DATABASE_HOST"),
         "PORT": os.getenv("DATABASE_PORT", "5432"),
     }
 }
@@ -100,7 +103,7 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -120,6 +123,7 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": "5",
     "EXCEPTION_HANDLER": "devassets_manager.utils.custom_exception_handler",
 }
+
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "devassets_manager API",
@@ -206,5 +210,36 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": False,
         },
+        "mozilla_django_oidc": {"handlers": ["console"], "level": "DEBUG"},
     },
 }
+
+
+# CUSTOM AUTHENTICATION BACKEND
+AUTHENTICATION_BACKENDS = [
+    "assets.auth.GoogleOIDCBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# GOOGLE OIDC CREDENTIAL
+OIDC_RP_CLIENT_ID = os.getenv("OIDC_RP_CLIENT_ID")
+OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_RP_CLIENT_SECRET")
+
+
+# INFO FROM GOOGLE
+OIDC_RP_SCOPES = "openid email profile"
+OIDC_RP_SIGN_ALGO = "RS256"
+
+# GOOGLE ENDPOINTS
+OIDC_OP_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
+OIDC_OP_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
+OIDC_OP_USER_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo"
+OIDC_OP_JWKS_ENDPOINT = "https://www.googleapis.com/oauth2/v3/certs"
+
+# LOGIN, LOGOUT FLOW
+LOGIN_URL = "/oidc/authenticate/"
+LOGIN_REDIRECT_URL = "/profile/"
+LOGOUT_REDIRECT_URL = "/"
+
+
+OIDC_CREATE_USER = True

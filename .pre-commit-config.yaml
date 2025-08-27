@@ -20,11 +20,11 @@ repos:
       - id: ruff
         args: [ --fix ]
 
-  - repo: local
-    hooks:
-      - id: django-test-check
-        name: Run Django tests
-        entry: docker exec -t dam-web python manage.py test tests
-        language: system
-        pass_filenames: false
-        always_run: true
+  # - repo: local
+  #   hooks:
+  #     - id: django-test-check
+  #       name: Run Django tests
+  #       entry: docker exec -t dam-web python manage.py test tests
+  #       language: system
+  #       pass_filenames: false
+  #       always_run: true

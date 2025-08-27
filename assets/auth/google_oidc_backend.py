@@ -7,7 +7,6 @@ from assets.models import EmployeeProfile
 class GoogleOIDCBackend(OIDCAuthenticationBackend):
 
     def create_user(self, claims):
-        print("create_user triggered", claims)
         user = super().create_user(claims)
         user.email = claims.get("email")
         user.first_name = claims.get("given_name", "")
@@ -22,7 +21,6 @@ class GoogleOIDCBackend(OIDCAuthenticationBackend):
         return user
 
     def update_user(self, user, claims):
-        print("update_user triggered", claims)
         user.email = claims.get("email", user.email)
         user.first_name = claims.get("given_name", user.first_name)
         user.last_name = claims.get("family_name", user.last_name)
@@ -36,7 +34,6 @@ class GoogleOIDCBackend(OIDCAuthenticationBackend):
         return user
 
     def filter_users_by_claims(self, claims):
-        print("filter_users_by_claims triggered", claims)
         email = claims.get("email")
         if not email:
             return self.UserModel.objects.none()

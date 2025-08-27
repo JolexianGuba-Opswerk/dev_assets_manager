@@ -93,7 +93,14 @@ class AssetListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Asset
-        fields = ["id", "name", "serial_number", "category", "status", "description"]
+        fields = [
+            "id",
+            "name",
+            "serial_number",
+            "category",
+            "status",
+            "description",
+        ]
 
     def get_category(self, obj):
         return obj.category.name if obj.category else None

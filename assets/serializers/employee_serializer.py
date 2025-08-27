@@ -30,6 +30,7 @@ class EmployeeListSerializer(serializers.ModelSerializer):
         return {
             "department": department_name,
             "position": position,
+            "avatar_url": profile.avatar_url,
         }
 
 

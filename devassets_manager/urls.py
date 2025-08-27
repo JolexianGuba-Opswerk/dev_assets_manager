@@ -7,15 +7,17 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+from assets.auth.custom_logout import customlogout
+from assets.auth.custom_token_refresh import CookieTokenRefreshView
 from assets.views import logout_view, profile_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("assets.urls")),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/schema/swagger-ui/",
@@ -29,6 +31,7 @@ urlpatterns = [
     ),
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path("oidc/", include("mozilla_django_oidc.urls")),
-    path("profile/", profile_view, name="profile"),
+    path("api/logout/", customlogout, name="custom_logout"),
     path("logout/", logout_view, name="logout"),
+    path("profile/", profile_view, name="profile"),
 ] + debug_toolbar_urls()

@@ -19,3 +19,4 @@ black~=25.1.0
 ruff~=0.12.9
 pre-commit~=4.3.0
 mozilla-django-oidc==4.0.1
+django-cors-headers==4.7.0

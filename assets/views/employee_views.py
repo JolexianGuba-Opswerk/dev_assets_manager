@@ -81,3 +81,19 @@ class EmployeeSideDetailsUpdate(generics.RetrieveUpdateAPIView):
     permission_classes = [IsOwnerOrReadOnly, IsAuthenticated]
     serializer_class = EmployeeSideUpdateSerializer
     lookup_field = "id"
+
+
+class AuthEmployeeDetailsVIEW(generics.RetrieveAPIView):
+    serializer_class = EmployeeListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        print()
+        if self.request.user.is_authenticated:
+            return User.objects.select_related(
+                "employee_profile", "employee_profile__department"
+            ).filter(id=self.request.user.id)
+        return User.objects.none()
+
+    def get_object(self):
+        return self.request.user

@@ -4,6 +4,7 @@ from assets.views import (
     AssetDetailsView,
     AssetHistoryListAPIView,
     AssetListCreateAPIView,
+    AuthEmployeeDetailsVIEW,
     EmployeeDetailsView,
     EmployeeListCreateAPIView,
     EmployeeSideDetailsUpdate,
@@ -35,7 +36,8 @@ urlpatterns = [
     path(
         "assets/history/", AssetHistoryListAPIView.as_view(), name="asset_history_list"
     ),
-    # OTP Routes
+    # OTP Routes and Auth
+    path("auth/me/", AuthEmployeeDetailsVIEW.as_view(), name="auth_employee_details"),
     path("forget-password/", RequestOTPView.as_view(), name="change_password"),
     path("verify-otp/", VerifyOTPView.as_view(), name="asset_history_list"),
     path("reset-password/", ResetPasswordView.as_view(), name="reset_password"),

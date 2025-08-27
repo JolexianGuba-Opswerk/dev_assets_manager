@@ -20,6 +20,14 @@ ALLOWED_HOSTS = _raw_hosts if _raw_hosts else (["*"] if DEBUG else [])
 INTERNAL_IPS = ["127.0.0.1"]
 APPEND_SLASH = True
 
+CORS_ALLOWED_ORIGINS = [
+    # os.getenv("WEB_URL"),
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 # Applications
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -38,6 +46,8 @@ INSTALLED_APPS = [
     "django_filters",
     # Mozilla OIDC
     "mozilla_django_oidc",
+    # CORS
+    "corsheaders",
 ]
 
 # Middleware
@@ -52,6 +62,7 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "devassets_manager.middleware.DetailedLoggingMiddleware",
     "mozilla_django_oidc.middleware.SessionRefresh",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "devassets_manager.urls"
@@ -110,12 +121,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # DRF & API schema
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        # 'rest_framework.permissions.IsAuthenticated'
-    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "assets.auth.cookie_jwt_auth.CookieJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
@@ -152,7 +162,7 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD") or None
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "AUTH_HEADER_TYPES": ("Bearer",),
+    # "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # DJANGO-REDIS SETTINGS
@@ -217,7 +227,7 @@ LOGGING = {
 
 # CUSTOM AUTHENTICATION BACKEND
 AUTHENTICATION_BACKENDS = [
-    "assets.auth.GoogleOIDCBackend",
+    "assets.auth.google_oidc_backend.GoogleOIDCBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -233,13 +243,18 @@ OIDC_RP_SIGN_ALGO = "RS256"
 # GOOGLE ENDPOINTS
 OIDC_OP_AUTHORIZATION_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 OIDC_OP_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
-OIDC_OP_USER_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo"
 OIDC_OP_JWKS_ENDPOINT = "https://www.googleapis.com/oauth2/v3/certs"
+OIDC_OP_USER_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo"
+OIDC_CALLBACK_CLASS = (
+    "assets.auth.custom_oidc_callback.CustomOIDCAuthenticationCallbackView"
+)
+
 
 # LOGIN, LOGOUT FLOW
 LOGIN_URL = "/oidc/authenticate/"
-LOGIN_REDIRECT_URL = "/profile/"
-LOGOUT_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "http://127.0.0.1:5173/dashboard/"
+LOGOUT_REDIRECT_URL = "http://127.0.0.1:5173/login/"
 
 
+ALLOW_LOGOUT_GET_METHOD = True
 OIDC_CREATE_USER = True

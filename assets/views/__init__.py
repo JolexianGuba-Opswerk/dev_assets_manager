@@ -9,5 +9,6 @@ from assets.views.employee_views import (
     EmployeeListCreateAPIView,
     EmployeeDetailsView,
     EmployeeSideDetailsUpdate,
+    AuthEmployeeDetailsVIEW,
 )
 from assets.views.oidc_views import profile_view, logout_view

@@ -8,4 +8,7 @@ from assets.serializers.asset_serializer import (
     UserAssetListSerializer,
 )
 
-from assets.serializers.employee_serializer import EmployeeListSerializer
+from assets.serializers.employee_serializer import (
+    EmployeeListSerializer,
+    CategoryDropdownSerializer,
+)

@@ -6,12 +6,18 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from assets.filters import EmployeeFilter
+from assets.models import Category, Department
 from assets.permissions import IsOwnerOrReadOnly
 from assets.serializers.employee_serializer import (
+    CategoryDropdownSerializer,
+    DepartmentDropdownSerializer,
     EmployeeCreateSerializer,
+    EmployeeDetailsSerializer,
+    EmployeeDropdownSerializer,
     EmployeeListSerializer,
     EmployeeSideUpdateSerializer,
     EmployeeUpdateSerializer,
@@ -33,7 +39,7 @@ class EmployeeListCreateAPIView(generics.ListCreateAPIView):
         filters.OrderingFilter,
     ]
     filterset_class = EmployeeFilter
-    search_fields = ["username", "=email"]
+    search_fields = ["username", "=email", "first_name", "last_name"]
 
     @method_decorator(cache_page(60 * 15, key_prefix="employee_list"))
     def list(self, request, *args, **kwargs):
@@ -64,7 +70,7 @@ class EmployeeDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_serializer_class(self):
         if self.request.method == "GET":
-            return EmployeeListSerializer
+            return EmployeeDetailsSerializer
         return super().get_serializer_class()
 
     def get_permissions(self):
@@ -83,17 +89,50 @@ class EmployeeSideDetailsUpdate(generics.RetrieveUpdateAPIView):
     lookup_field = "id"
 
 
+class EmployeeDropDown(generics.ListAPIView):
+    serializer_class = EmployeeDropdownSerializer
+    permission_classes = [IsAdminUser, IsAuthenticated]
+    pagination_class = None
+
+    def get_queryset(self):
+        return User.objects.filter(is_superuser=False).order_by(
+            "first_name", "last_name"
+        )
+
+
+class CategoryDropDown(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategoryDropdownSerializer
+    permission_classes = [IsAdminUser, IsAuthenticated]
+    pagination_class = None
+
+
+class EmployeeDepartmentDropdown(generics.ListAPIView):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentDropdownSerializer
+    permission_classes = [IsAdminUser, IsAuthenticated]
+    pagination_class = None
+
+
 class AuthEmployeeDetailsVIEW(generics.RetrieveAPIView):
     serializer_class = EmployeeListSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        print()
-        if self.request.user.is_authenticated:
-            return User.objects.select_related(
-                "employee_profile", "employee_profile__department"
-            ).filter(id=self.request.user.id)
-        return User.objects.none()
+
+        return User.objects.select_related(
+            "employee_profile", "employee_profile__department"
+        )
 
     def get_object(self):
-        return self.request.user
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            raise AuthenticationFailed("User is not authenticated")
+
+        # Return the actual User instance from the queryset
+        try:
+            return self.get_queryset().get(id=user.id)
+        except User.DoesNotExist:
+            raise AuthenticationFailed(
+                "Authenticated user not found in database"
+            ) from None

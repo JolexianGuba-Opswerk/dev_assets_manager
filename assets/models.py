@@ -31,6 +31,7 @@ class EmployeeProfile(models.Model):
     )
     position = models.CharField(max_length=100, blank=True, null=True)
     avatar_url = models.TextField(blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
 
 
 # Asset model

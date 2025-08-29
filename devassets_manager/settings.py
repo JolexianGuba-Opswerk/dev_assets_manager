@@ -252,9 +252,10 @@ OIDC_CALLBACK_CLASS = (
 
 # LOGIN, LOGOUT FLOW
 LOGIN_URL = "/oidc/authenticate/"
-LOGIN_REDIRECT_URL = "http://127.0.0.1:5173/dashboard/"
+# LOGIN_REDIRECT_URL = "http://127.0.0.1:5173/dashboard/"
 LOGOUT_REDIRECT_URL = "http://127.0.0.1:5173/login/"
 
 
 ALLOW_LOGOUT_GET_METHOD = True
 OIDC_CREATE_USER = True
+OIDC_AUTH_REQUEST_EXTRA_PARAMS = {"prompt": "select_account"}

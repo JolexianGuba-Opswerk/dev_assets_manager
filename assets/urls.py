@@ -5,7 +5,10 @@ from assets.views import (
     AssetHistoryListAPIView,
     AssetListCreateAPIView,
     AuthEmployeeDetailsVIEW,
+    CategoryDropDown,
+    EmployeeDepartmentDropdown,
     EmployeeDetailsView,
+    EmployeeDropDown,
     EmployeeListCreateAPIView,
     EmployeeSideDetailsUpdate,
     UserAssetDetailsView,
@@ -32,6 +35,21 @@ urlpatterns = [
         "employees-side/asset/<int:id>/",
         UserOwnAssetDetailsAPIView.as_view(),
         name="employee_assets_details",
+    ),
+    path(
+        "employees/drop-downs/",
+        EmployeeDropDown.as_view(),
+        name="employee_dropdown",
+    ),
+    path(
+        "category/drop-downs/",
+        CategoryDropDown.as_view(),
+        name="category_dropdown",
+    ),
+    path(
+        "department/drop-downs/",
+        EmployeeDepartmentDropdown.as_view(),
+        name="department_dropdown",
     ),
     path(
         "assets/history/", AssetHistoryListAPIView.as_view(), name="asset_history_list"

@@ -126,13 +126,19 @@ class AssetDetailSerializer(serializers.ModelSerializer):
     def get_assigned_to(self, obj):
         if obj.assigned_to:
             return {
+                "id": obj.assigned_to.id,
                 "name": obj.assigned_to.get_full_name(),
                 "email": obj.assigned_to.email,
             }
         return None
 
     def get_category(self, obj):
-        return obj.category.name if obj.category else None
+        if obj.category:
+            return {
+                "id": obj.category.id,
+                "name": obj.category.name,
+            }
+        return None
 
 
 # Nested Serializer for our Employee Asset

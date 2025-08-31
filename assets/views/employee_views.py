@@ -129,7 +129,6 @@ class AuthEmployeeDetailsVIEW(generics.RetrieveAPIView):
         if not user or not user.is_authenticated:
             raise AuthenticationFailed("User is not authenticated")
 
-        # Return the actual User instance from the queryset
         try:
             return self.get_queryset().get(id=user.id)
         except User.DoesNotExist:

@@ -60,8 +60,9 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-    "devassets_manager.middleware.DetailedLoggingMiddleware",
-    "mozilla_django_oidc.middleware.SessionRefresh",
+    "devassets_manager.middlewares.no_browser_cache.NoBrowserCacheMiddleware",
+    "devassets_manager.middlewares.middleware.DetailedLoggingMiddleware",
+    # "mozilla_django_oidc.middleware.SessionRefresh",
     "corsheaders.middleware.CorsMiddleware",
 ]
 
@@ -160,9 +161,8 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD") or None
 
 # JWT SETTINGS
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    # "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # DJANGO-REDIS SETTINGS

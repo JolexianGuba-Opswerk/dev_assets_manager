@@ -7,16 +7,15 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
-from rest_framework_simplejwt.views import TokenObtainPairView
 
 from assets.auth.custom_logout import customlogout
-from assets.auth.custom_token_refresh import CookieTokenRefreshView
 from assets.views import logout_view, profile_view
+from assets.views.jwt_views import CookieTokenObtainPairView, CookieTokenRefreshView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("assets.urls")),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(

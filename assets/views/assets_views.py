@@ -42,7 +42,7 @@ class AssetListCreateAPIView(generics.ListCreateAPIView):
     # 15 MINUTES OF CACHING
     @method_decorator(cache_page(60 * 15, key_prefix="asset_list"))
     def list(self, request, *args, **kwargs):
-        return super().list(request, request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
     def get_queryset(self):
         time.sleep(2)

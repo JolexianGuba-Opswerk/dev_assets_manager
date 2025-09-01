@@ -163,6 +163,7 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD") or None
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # DJANGO-REDIS SETTINGS

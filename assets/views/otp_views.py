@@ -4,15 +4,19 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from assets.services.otp_services import store_otp, verify_otp
 from assets.tasks import send_otp_email
 
 
+@authentication_classes([])
+@permission_classes([AllowAny])
 class RequestOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -36,6 +40,8 @@ class RequestOTPView(APIView):
         )
 
 
+@authentication_classes([])
+@permission_classes([AllowAny])
 class VerifyOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -68,6 +74,7 @@ class VerifyOTPView(APIView):
 
 class ResetPasswordView(APIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         new_password = request.data.get("new_password")

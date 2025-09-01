@@ -9,7 +9,6 @@ class CookieJWTAuthentication(JWTAuthentication):
     """
 
     def authenticate(self, request):
-
         raw_token = request.COOKIES.get("access_token")
         if raw_token is None:
             print("No access_token cookie found")

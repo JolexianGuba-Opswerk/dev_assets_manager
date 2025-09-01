@@ -9,8 +9,9 @@ from drf_spectacular.views import (
 )
 
 from assets.auth.custom_logout import customlogout
+from assets.auth.custom_token_refresh import CookieTokenRefreshView
 from assets.views import logout_view, profile_view
-from assets.views.jwt_views import CookieTokenObtainPairView, CookieTokenRefreshView
+from assets.views.jwt_views import CookieTokenObtainPairView
 
 urlpatterns = [
     path("admin/", admin.site.urls),

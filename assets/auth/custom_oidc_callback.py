@@ -17,10 +17,8 @@ class CustomOIDCAuthenticationCallbackView(OIDCAuthenticationCallbackView):
         """
         user = self.user
 
-        # Generate JWT token for the user
         refresh = RefreshToken.for_user(user)
 
-        # Make sure the user is logged in
         request_user = getattr(self.request, "user", None)
         if (
             not request_user
@@ -36,12 +34,9 @@ class CustomOIDCAuthenticationCallbackView(OIDCAuthenticationCallbackView):
         self.request.session["oidc_id_token_expiration"] = (
             time.time() + expiration_interval
         )
-
-        # Clear any previous 'oidc_login_next' to prevent override
         self.request.session.pop("oidc_login_next", None)
 
-        # Attach JWT access token as HttpOnly cookie
-        response = HttpResponseRedirect("/")  # Placeholder, will override below
+        response = HttpResponseRedirect("/")
         response.set_cookie(
             "access_token",
             str(refresh.access_token),
@@ -51,7 +46,6 @@ class CustomOIDCAuthenticationCallbackView(OIDCAuthenticationCallbackView):
             path="/",
         )
 
-        # Determine redirect URL based on user role
         if user.is_staff or user.is_superuser:
             redirect_url = "http://127.0.0.1:5173/admin/"
         else:

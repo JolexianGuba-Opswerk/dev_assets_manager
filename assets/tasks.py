@@ -47,3 +47,23 @@ def send_otp_email(email, otp):
 
     email.attach_alternative(html_content, "text/html")
     email.send()
+
+
+@shared_task
+def send_change_password(email, current_password):
+    current_year = timezone.now().year
+    subject = "Secure Your Account: Dev Assets Manager Credentials Inside"
+
+    html_content = render_to_string(
+        "emails/send_change_password.html",
+        {"email": email, "password": current_password, "current_year": current_year},
+    )
+
+    text_content = strip_tags(html_content)
+
+    email = EmailMultiAlternatives(
+        subject, text_content, "noreply@dev_asset_manager.com", [email]
+    )
+
+    email.attach_alternative(html_content, "text/html")
+    email.send()

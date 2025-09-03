@@ -155,32 +155,13 @@ class UserAssetDetailSerializer(serializers.ModelSerializer):
 
 class UserAssetListSerializer(serializers.ModelSerializer):
     assets = UserAssetDetailSerializer(many=True, read_only=True)
-    employee_profile = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = [
             "id",
-            "username",
-            "first_name",
-            "last_name",
-            "email",
-            "employee_profile",
             "assets",
         ]
-
-    def get_employee_profile(self, obj):
-        profile = getattr(obj, "employee_profile", None)
-        if not profile:
-            return None
-
-        department_name = getattr(profile.department, "full_name", None)
-        position = getattr(profile, "position", None)
-
-        return {
-            "department": department_name,
-            "position": position,
-        }
 
 
 class AssetHistorySerializer(serializers.ModelSerializer):
@@ -193,7 +174,11 @@ class AssetHistorySerializer(serializers.ModelSerializer):
         fields = ["previous_user", "new_user", "change_date", "notes", "asset"]
 
     def get_asset(self, obj):
-        return {"name": obj.asset.name, "serial_number": obj.asset.serial_number}
+        return {
+            "id": obj.asset.id,
+            "name": obj.asset.name,
+            "serial_number": obj.asset.serial_number,
+        }
 
 
 class UserAssetSerializer(serializers.ModelSerializer):

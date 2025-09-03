@@ -95,8 +95,10 @@ class EmployeeDropDown(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return User.objects.filter(is_superuser=False).order_by(
-            "first_name", "last_name"
+        return (
+            User.objects.filter(is_superuser=False, employee_profile__is_verified=True)
+            .order_by("first_name", "last_name")
+            .select_related("employee_profile")
         )
 
 

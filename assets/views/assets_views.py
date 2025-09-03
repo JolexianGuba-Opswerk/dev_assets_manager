@@ -78,17 +78,15 @@ class AssetDetailsView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # Getting User's Asset with Details
-class UserAssetDetailsView(generics.ListAPIView):
+class UserAssetDetailsView(generics.RetrieveAPIView):
     queryset = (
         User.objects.select_related("employee_profile__department").prefetch_related(
             "assets__category"
         )
     ).order_by("-id")
+    lookup_field = "id"
     serializer_class = UserAssetListSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
-
-    filter_backends = [filters.SearchFilter]
-    search_fields = ["username", "email"]
 
 
 # Getting Own Assets of User

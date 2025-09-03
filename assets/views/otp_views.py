@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -74,6 +75,7 @@ class VerifyOTPView(APIView):
 
 class ResetPasswordView(APIView):
     permission_classes = [IsAuthenticated]
+    # Overriding the default class authentication
     authentication_classes = [JWTAuthentication]
 
     def post(self, request):
@@ -91,6 +93,44 @@ class ResetPasswordView(APIView):
 
         request.user.set_password(new_password)
         request.user.save()
+        return Response(
+            {"message": "Password changed successfully"}, status=status.HTTP_200_OK
+        )
+
+
+class ChangePassword(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        current_password = request.data.get("current_password")
+        new_password = request.data.get("new_password")
+
+        if not current_password and new_password:
+            return Response(
+                {"error": "Current password and new password is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not request.user.check_password(current_password):
+            return Response(
+                {"error": "Wrong Current Password"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if current_password == new_password:
+            return Response(
+                {"error": "New password must be different"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            validate_password(new_password, user=request.user)
+        except ValidationError as e:
+            return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.set_password(new_password)
+        request.user.save()
+        update_session_auth_hash(request, self.request.user)
+
         return Response(
             {"message": "Password changed successfully"}, status=status.HTTP_200_OK
         )

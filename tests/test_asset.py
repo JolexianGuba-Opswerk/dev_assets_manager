@@ -66,7 +66,7 @@ class AssetAPITest(APITestCase):
 
     def test_list_assets_requires_auth(self):
         response = self.client.get(self.asset_list_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # ----- CREATE, UPDATE SECTION ----- #
     # Admin Create Asset

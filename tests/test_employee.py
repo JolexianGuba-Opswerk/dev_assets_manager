@@ -52,18 +52,12 @@ class EmployeeAPITest(APITestCase):
         self.side_update_url = lambda id: reverse("employee_side_details", args=[id])
 
     def authenticate_as_admin(self):
-        response = self.client.post(
+        self.client.post(
             self.token_url, {"username": "admin", "password": "admin_pass"}
         )
-        token = response.data["access"]
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
 
     def authenticate_as_normal_user(self):
-        response = self.client.post(
-            self.token_url, {"username": "user", "password": "user_pass"}
-        )
-        token = response.data["access"]
-        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+        self.client.post(self.token_url, {"username": "user", "password": "user_pass"})
 
     # ----- CREATE SECTION ----- #
 
@@ -77,11 +71,12 @@ class EmployeeAPITest(APITestCase):
             "password": "test_pass",
             "department": self.it_department.id,
             "position": "Software Engineer",
+            "is_verified": True,
         }
         response = self.client.post(
             self.employee_list_create_api, payload, format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # Creating employee as a normal user
     def test_create_employee_as_normal_user(self):
@@ -111,6 +106,7 @@ class EmployeeAPITest(APITestCase):
             "password": "test_pass",
             "department": self.it_department.id,
             "position": "Software Engineer",
+            "is_verified": True,
         }
         response = self.client.post(
             self.employee_list_create_api, payload, format="json"
@@ -125,9 +121,9 @@ class EmployeeAPITest(APITestCase):
             "first_name": "test_first_name",
             "last_name": "test_last_name",
             "email": "test@mail.com",
-            "password": None,
             "department": self.it_department.id,
             "position": "Software Engineer",
+            "password": "test_pass",
         }
         response = self.client.post(
             self.employee_list_create_api, payload, format="json"
@@ -187,7 +183,7 @@ class EmployeeAPITest(APITestCase):
     # Listing employees without credentials
     def test_list_employees_no_credentials(self):
         response = self.client.get(self.employee_list_create_api)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     # Search existing user
     def test_search_existing_user(self):

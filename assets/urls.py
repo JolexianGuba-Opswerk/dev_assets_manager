@@ -14,13 +14,22 @@ from assets.views import (
     UserAssetDetailsView,
     UserOwnAssetDetailsAPIView,
 )
-from assets.views.otp_views import RequestOTPView, ResetPasswordView, VerifyOTPView
+from assets.views.otp_views import (
+    ChangePassword,
+    RequestOTPView,
+    ResetPasswordView,
+    VerifyOTPView,
+)
 
 urlpatterns = [
     # Assets Routes
     path("assets/", AssetListCreateAPIView.as_view(), name="asset_list_create"),
     path("assets/<int:id>/", AssetDetailsView.as_view(), name="asset_list_detail"),
-    path("assets/employee/", UserAssetDetailsView.as_view(), name="employee_assets"),
+    path(
+        "assets/employee/<int:id>/",
+        UserAssetDetailsView.as_view(),
+        name="employee_assets",
+    ),
     # Employee Routes
     path(
         "employees/", EmployeeListCreateAPIView.as_view(), name="employee_list_create"
@@ -59,4 +68,5 @@ urlpatterns = [
     path("forget-password/", RequestOTPView.as_view(), name="change_password"),
     path("verify-otp/", VerifyOTPView.as_view(), name="asset_history_list"),
     path("reset-password/", ResetPasswordView.as_view(), name="reset_password"),
+    path("change-password/", ChangePassword.as_view(), name="change-password"),
 ]

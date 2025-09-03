@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from assets.models import Category, Department, EmployeeProfile
-from assets.tasks import send_welcome_email
+from assets.tasks import send_change_password, send_welcome_email
 
 
 class EmployeeListSerializer(serializers.ModelSerializer):
@@ -90,6 +92,14 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
 
         extra_kwargs = {"password": {"write_only": True}}
 
+    def validate_password(self, value):
+        user = User(self.initial_data)
+        try:
+            validate_password(value, user=user)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e.messages)
+        return value
+
     def create(
         self,
         validated_data,
@@ -115,7 +125,7 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
         )
         department_name = employee_profile.department.full_name.title()
         send_welcome_email.delay(user.email, full_name, department_name, position)
-
+        send_change_password.delay(user.email, password)
         return user
 
 
